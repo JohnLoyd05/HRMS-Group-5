@@ -1,12 +1,16 @@
-# HRMS-Group-5
+# React + Vite
 
-## 🌿 Branching Strategy
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Our team follows a strict 3-tier branching system. **Direct pushes to `main` and `dev` are blocked.**
+Currently, two official plugins are available:
 
-* **`main` (Production Branch):** This is the final, stable version of the app. Code only reaches this branch at the end of a sprint via a Pull Request from `dev`.
-* **`dev` (Development/Staging Branch):** This is our integration branch. All completed features are merged here first to ensure they work together properly. 
-* **`feature/*` (Task Branches):** Whenever you start a new task, create a branch off of `dev`. 
-  * Name it descriptively based on what you are doing: `feat/employee-ui`, `db/cascade-trigger`, `fix/login-bug`.
-  * When your task is finished, open a Pull Request (PR) to merge it back into `dev`.
-  * At least 1 team member must review and approve your PR before it can be merged.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
