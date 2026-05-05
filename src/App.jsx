@@ -11,6 +11,7 @@ import DepartmentsPage from './pages/DepartmentsPage'
 import AdminPage from './pages/AdminPage'
 import DeletedItemsPage from './pages/DeletedItemsPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
+import InactivePage from './pages/InactivePage'
 import { AuthProvider } from './context/AuthContext'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/inactive" element={<InactivePage />} />
 
           {/* Protected Routes */}
           <Route path="/employees" element={

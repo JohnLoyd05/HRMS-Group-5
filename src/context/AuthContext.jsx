@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext({})
@@ -7,6 +8,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,14 +33,14 @@ export function AuthProvider({ children }) {
             await supabase.auth.signOut()
             setCurrentUser(null)
             setSession(null)
-            alert('Your account is inactive. Please contact your administrator.')
+            navigate('/inactive')
           }
         }
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [navigate])
 
   return (
     <AuthContext.Provider value={{ currentUser, session, loading }}>
