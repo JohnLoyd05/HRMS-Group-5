@@ -1,6 +1,13 @@
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
 function ProtectedRoute({ children }) {
-  // Auth check will be wired here by M4 (Rights & Auth Specialist)
-  // For now, all routes are accessible for development purposes
+  const { currentUser, loading } = useAuth()
+
+  if (loading) return <p>Loading...</p>
+
+  if (!currentUser) return <Navigate to="/login" replace />
+
   return children
 }
 

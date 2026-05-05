@@ -2,21 +2,22 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signUp({ email, password })
     if (error) {
       setError(error.message)
     } else {
-      navigate('/employees')
+      setMessage('Check your email to confirm your account!')
     }
     setLoading(false)
   }
@@ -30,8 +31,9 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: 400, margin: '100px auto', padding: 24 }}>
-      <h1>Login</h1>
+      <h1>Register</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {message && <p style={{ color: 'green' }}>{message}</p>}
       <input
         type="email"
         placeholder="Email"
@@ -46,13 +48,13 @@ export default function LoginPage() {
         onChange={e => setPassword(e.target.value)}
         style={{ display: 'block', width: '100%', marginBottom: 16, padding: 8 }}
       />
-      <button onClick={handleLogin} disabled={loading} style={{ width: '100%', padding: 10, marginBottom: 8 }}>
-        {loading ? 'Logging in...' : 'Login'}
+      <button onClick={handleRegister} disabled={loading} style={{ width: '100%', padding: 10, marginBottom: 8 }}>
+        {loading ? 'Registering...' : 'Register'}
       </button>
       <button onClick={handleGoogle} style={{ width: '100%', padding: 10, marginBottom: 16 }}>
-        Sign in with Google
+        Sign up with Google
       </button>
-      <p>No account? <Link to="/register">Register here</Link></p>
+      <p>Already have an account? <Link to="/login">Login here</Link></p>
     </div>
   )
 }
