@@ -6,12 +6,18 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/");
+    // Exchange the OAuth code for a session, then let AuthContext's
+    // onAuthStateChange login guard decide whether to allow or block.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        navigate("/employees", { replace: true });
+      } else if (event === "SIGNED_OUT") {
+        navigate("/login", { replace: true });
       }
     });
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   return (
     <div style={{

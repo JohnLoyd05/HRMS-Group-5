@@ -11,30 +11,50 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setCurrentUser(session?.user ?? null)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const { data: userRow, error } = await supabase
+          .from('user')
+          .select('record_status, user_type, username')
+          .eq('id', session.user.id)
+          .single()
+
+        if (error) {
+          console.error('AuthContext getSession user query error:', error.message)
+        }
+
+        if (userRow?.record_status === 'ACTIVE') {
+          setSession(session)
+          setCurrentUser({ ...session.user, ...userRow })
+        } else {
+          await supabase.auth.signOut()
+          navigate('/inactive')
+        }
+      }
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session)
-        setCurrentUser(session?.user ?? null)
-
-        if (_event === 'SIGNED_IN' && session?.user) {
-          const { data, error } = await supabase
-            .from('employees')
-            .select('record_status')
-            .eq('auth_id', session.user.id)
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const { data: userRow } = await supabase
+            .from('user')
+            .select('record_status, user_type, username')
+            .eq('id', session.user.id)
             .single()
 
-          if (error || !data || data.record_status !== 'ACTIVE') {
+          if (userRow?.record_status === 'ACTIVE') {
+            setSession(session)
+            setCurrentUser({ ...session.user, ...userRow })
+          } else {
             await supabase.auth.signOut()
             setCurrentUser(null)
             setSession(null)
             navigate('/inactive')
           }
+        } else if (event === 'SIGNED_OUT') {
+          setCurrentUser(null)
+          setSession(null)
         }
       }
     )
