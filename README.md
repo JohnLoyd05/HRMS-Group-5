@@ -31,8 +31,8 @@ A web-based HR System built with React 18, Vite, Tailwind CSS, and Supabase.
 
 1. Clone the repository
 ```bash
-   git clone https://github.com/JohnLoyd05/HRMS-Group-5/edit/main/README.md
-   cd C:\Users\A\Documents\Infoman2-Proj-HRMS
+   git clone https://github.com/JohnLoyd05/HRMS-Group-5.git
+   cd HRMS-Group-5
 ```
 
 2. Install dependencies
@@ -44,7 +44,11 @@ A web-based HR System built with React 18, Vite, Tailwind CSS, and Supabase.
 ```bash
    cp .env.example .env
 ```
-   Open `.env` and set:
+   Open `.env` and set your Supabase project URL and anon key:
+   ```
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key
+   ```
    
 4. Run the development server
 ```bash
