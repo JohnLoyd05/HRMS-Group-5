@@ -1,29 +1,31 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 
-export default function AppShell({ children, page, setPage, session }) {
+export default function AppShell({ children, session }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const userEmail = session?.user?.email || "User";
-  
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    window.location.reload();
+    // onAuthStateChange will set session to null → ProtectedRoute redirects to /login
   };
 
-  // Dito natin ibabalik lahat ng nawalang menu items
   const NAV = [
-    { id: "employees",   label: "Employees",    icon: "👤" },
-    { id: "jobhistory",  label: "Job History",  icon: "📋" },
-    { id: "jobs",        label: "Jobs",         icon: "💼" },
-    { id: "departments", label: "Departments",  icon: "🏢" },
-    { id: "reports",     label: "Reports",      icon: "📊" },
-    { id: "deleted",     label: "Deleted Items", icon: "🗑️" },
-    { id: "admin",       label: "Admin",        icon: "⚙️" },
+    { path: "/employees",     label: "Employees",    icon: "👤" },
+    { path: "/jobhistory",    label: "Job History",  icon: "📋" },
+    { path: "/jobs",          label: "Jobs",         icon: "💼" },
+    { path: "/departments",   label: "Departments",  icon: "🏢" },
+    { path: "/reports",       label: "Reports",      icon: "📊" },
+    { path: "/deleted-items", label: "Deleted Items", icon: "🗑️" },
+    { path: "/admin",         label: "Admin",        icon: "⚙️" },
   ];
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f5f4f0", fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         .ni { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; color: #555; border: none; background: transparent; width: 100%; text-align: left; }
-        .ni:hover { background: #eee9e2; color: #1a1a18; } 
+        .ni:hover { background: #eee9e2; color: #1a1a18; }
         .ni.act { background: #1a1a18; color: #fff; }
         .user-section { padding: 16px; border-top: 1px solid #eee; margin-top: auto; }
         .avatar { width: 32px; height: 32px; background: #185FA5; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
@@ -37,7 +39,11 @@ export default function AppShell({ children, page, setPage, session }) {
 
         <nav style={{ flex: 1, padding: "16px 12px", display: "flex", flexDirection: "column", gap: 4 }}>
           {NAV.map(item => (
-            <button key={item.id} className={`ni ${page === item.id ? "act" : ""}`} onClick={() => setPage(item.id)}>
+            <button
+              key={item.path}
+              className={`ni ${location.pathname === item.path ? "act" : ""}`}
+              onClick={() => navigate(item.path)}
+            >
               <span style={{ fontSize: 16 }}>{item.icon}</span>
               <span>{item.label}</span>
             </button>
