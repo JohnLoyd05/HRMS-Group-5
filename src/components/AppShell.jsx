@@ -10,6 +10,7 @@ export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const displayName = currentUser?.username || currentUser?.firstname || currentUser?.email?.split("@")[0] || "User";
+  const userType = currentUser?.user_type;
   const page = location.pathname.slice(1) || "employees";
 
   const handleLogout = async () => {
@@ -22,8 +23,10 @@ export default function AppShell() {
     { id: "jobs",         label: "Jobs",         icon: "💼" },
     { id: "departments",  label: "Departments",  icon: "🏢" },
     { id: "reports",      label: "Reports",      icon: "📊" },
-    { id: "deleted-items", label: "Deleted Items", icon: "🗑️" },
-    { id: "admin",        label: "Admin",        icon: "⚙️" },
+    ...(userType !== "USER" ? [
+      { id: "deleted-items", label: "Deleted Items", icon: "🗑️" },
+      { id: "admin",         label: "Admin",         icon: "⚙️" },
+    ] : []),
   ];
 
   const handleNav = (id) => {
