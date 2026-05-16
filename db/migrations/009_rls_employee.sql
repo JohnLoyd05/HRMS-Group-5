@@ -1,3 +1,8 @@
+-- 009_rls_employee.sql
+-- RLS policies for the employee table.
+
+ALTER TABLE public.employee ENABLE ROW LEVEL SECURITY;
+
 -- 1. SELECT: USER sees ACTIVE only; ADMIN/SUPERADMIN see all
 CREATE POLICY emp_select ON public.employee
   FOR SELECT TO authenticated
@@ -5,8 +10,8 @@ CREATE POLICY emp_select ON public.employee
     record_status = 'ACTIVE'
     OR EXISTS (
       SELECT 1 FROM public."user"
-      WHERE "userId" = auth.uid()::text
-        AND user_type IN ('ADMIN','SUPERADMIN')
+      WHERE id::uuid = auth.uid()
+        AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
 
@@ -16,9 +21,9 @@ CREATE POLICY emp_insert ON public.employee
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u."userId" = auth.uid()::text
-      WHERE umr."userId" = u."userId"
-        AND umr.right_code = 'EMP_ADD'
+      JOIN public."user" u ON u.id::uuid = auth.uid()
+      WHERE umr.user_id = u.id
+        AND umr."rightCode" = 'EMP_ADD'
         AND umr.right_value = 1
     )
   );
@@ -29,14 +34,35 @@ CREATE POLICY emp_update_edit ON public.employee
   USING (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u."userId" = auth.uid()::text
-      WHERE umr."userId" = u."userId"
-        AND umr.right_code = 'EMP_EDIT'
+      JOIN public."user" u ON u.id::uuid = auth.uid()
+      WHERE umr.user_id = u.id
+        AND umr."rightCode" = 'EMP_EDIT'
         AND umr.right_value = 1
     )
   );
 
 -- 4. UPDATE record_status to INACTIVE: requires EMP_DEL = 1
--- 5. UPDATE record_status to ACTIVE (recover): requires ADMIN or SUPERADMIN
--- (These can be separate policies or handled via the EDIT policy + app-layer logic;
---  the guide shows these as part of the UPDATE policies)
+CREATE POLICY emp_update_deactivate ON public.employee
+  FOR UPDATE TO authenticated
+  USING (
+    record_status = 'ACTIVE'
+    AND EXISTS (
+      SELECT 1 FROM public."UserModule_Rights" umr
+      JOIN public."user" u ON u.id::uuid = auth.uid()
+      WHERE umr.user_id = u.id
+        AND umr."rightCode" = 'EMP_DEL'
+        AND umr.right_value = 1
+    )
+  );
+
+-- 5. UPDATE record_status to ACTIVE (recover): ADMIN/SUPERADMIN only
+CREATE POLICY emp_update_recover ON public.employee
+  FOR UPDATE TO authenticated
+  USING (
+    record_status = 'INACTIVE'
+    AND EXISTS (
+      SELECT 1 FROM public."user"
+      WHERE id::uuid = auth.uid()
+        AND user_type IN ('ADMIN', 'SUPERADMIN')
+    )
+  );
