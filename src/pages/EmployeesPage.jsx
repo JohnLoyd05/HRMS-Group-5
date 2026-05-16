@@ -1,18 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useRights } from "../context/UserRightsContext";
 import {
   getEmployees,
   addEmployee,
   updateEmployee,
   softDeleteEmployee,
 } from "../services/employeeService";
-
-// --- Rights helpers ---
-const canAdd = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canEdit = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canDelete = (t) => t === "SUPERADMIN";
-const canSeeStamp = (t) => t === "ADMIN" || t === "SUPERADMIN";
 
 // --- Shared styles ---
 const S = {
@@ -183,7 +178,9 @@ function SoftDeleteConfirmDialog({ emp, onConfirm, onCancel, saving }) {
 // --- Main page ---
 export default function EmployeesPage() {
   const { currentUser } = useAuth();
+  const { rights } = useRights();
   const userType = currentUser?.user_type;
+  const showStamp = userType === "ADMIN" || userType === "SUPERADMIN";
   const navigate = useNavigate();
 
   const [employees, setEmployees] = useState([]);
@@ -235,7 +232,7 @@ export default function EmployeesPage() {
     <div style={S.page}>
       <div style={S.header}>
         <h1 style={S.h1}>Employees</h1>
-        {canAdd(userType) && (
+        {rights.EMP_ADD && (
           <button style={S.btnPrimary} onClick={() => { setShowAdd(true); setSaveErr(""); }}>
             + Add Employee
           </button>
@@ -253,7 +250,7 @@ export default function EmployeesPage() {
             <Th>Gender</Th>
             <Th>Hire Date</Th>
             <Th>Status</Th>
-            {canSeeStamp(userType) && <Th>Stamp</Th>}
+            {showStamp && <Th>Stamp</Th>}
             <Th>Actions</Th>
           </tr>
         </thead>
@@ -268,7 +265,7 @@ export default function EmployeesPage() {
               <Td>
                 <span style={S.badge(emp.record_status)}>{emp.record_status}</span>
               </Td>
-              {canSeeStamp(userType) && <Td style={{ fontSize: 11, color: "#888" }}>{emp.stamp}</Td>}
+              {showStamp && <Td style={{ fontSize: 11, color: "#888" }}>{emp.stamp}</Td>}
               <Td>
                 <button
                   style={S.btnSmView}
@@ -276,12 +273,12 @@ export default function EmployeesPage() {
                 >
                   View
                 </button>
-                {canEdit(userType) && emp.record_status === "ACTIVE" && (
+                {rights.EMP_EDIT && emp.record_status === "ACTIVE" && (
                   <button style={S.btnSmEdit} onClick={() => { setEditTarget(emp); setSaveErr(""); }}>
                     Edit
                   </button>
                 )}
-                {canDelete(userType) && emp.record_status === "ACTIVE" && (
+                {rights.EMP_DEL && emp.record_status === "ACTIVE" && (
                   <button style={S.btnSmDel} onClick={() => setDeleteTarget(emp)}>
                     Deactivate
                   </button>
@@ -291,7 +288,7 @@ export default function EmployeesPage() {
           ))}
           {employees.length === 0 && !loadErr && (
             <tr>
-              <td colSpan={canSeeStamp(userType) ? 8 : 7} style={{ ...S.td, textAlign: "center", color: "#888" }}>
+              <td colSpan={showStamp ? 8 : 7} style={{ ...S.td, textAlign: "center", color: "#888" }}>
                 No employees found.
               </td>
             </tr>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useRights } from "../context/UserRightsContext";
 import { getEmployees } from "../services/employeeService";
 import {
   getJobHistory,
@@ -10,12 +11,6 @@ import {
 } from "../services/jobHistoryService";
 import { getJobs } from "../services/jobService";
 import { getDepts } from "../services/departmentService";
-
-// --- Rights helpers ---
-const canAdd = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canEdit = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canDelete = (t) => t === "SUPERADMIN";
-const canSeeStamp = (t) => t === "ADMIN" || t === "SUPERADMIN";
 
 // --- Formatters ---
 function formatDate(val) {
@@ -264,7 +259,9 @@ export default function EmployeeDetailPage() {
   const { empno } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { rights } = useRights();
   const userType = currentUser?.user_type;
+  const showStamp = userType === "ADMIN" || userType === "SUPERADMIN";
 
   const [employee, setEmployee] = useState(null);
   const [jobHistory, setJobHistory] = useState([]);
@@ -376,7 +373,7 @@ export default function EmployeeDetailPage() {
           <ProfileField label="Birthdate" value={formatDate(employee.birthdate)} />
           <ProfileField label="Hire Date" value={formatDate(employee.hiredate)} />
           <ProfileField label="Separation Date" value={formatDate(employee.sepDate)} />
-          {canSeeStamp(userType) && (
+          {showStamp && (
             <ProfileField label="Stamp" value={employee.stamp} />
           )}
         </div>
@@ -386,7 +383,7 @@ export default function EmployeeDetailPage() {
       <div style={S.card}>
         <div style={S.sectionHeader}>
           <h2 style={S.sectionTitle}>Job History</h2>
-          {canAdd(userType) && employee.record_status === "ACTIVE" && (
+          {rights.JH_ADD && employee.record_status === "ACTIVE" && (
             <button style={S.btnPrimary} onClick={() => { setShowAdd(true); setSaveErr(""); }}>
               + Add Job History
             </button>
@@ -403,8 +400,8 @@ export default function EmployeeDetailPage() {
               <Th>Department</Th>
               <Th>Salary</Th>
               <Th>Status</Th>
-              {canSeeStamp(userType) && <Th>Stamp</Th>}
-              {(canEdit(userType) || canDelete(userType)) && <Th>Actions</Th>}
+              {showStamp && <Th>Stamp</Th>}
+              {(rights.JH_EDIT || rights.JH_DEL) && <Th>Actions</Th>}
             </tr>
           </thead>
           <tbody>
@@ -417,17 +414,17 @@ export default function EmployeeDetailPage() {
                 <Td>
                   <span style={S.badge(row.record_status)}>{row.record_status}</span>
                 </Td>
-                {canSeeStamp(userType) && (
+                {showStamp && (
                   <Td style={{ fontSize: 11, color: "#888" }}>{row.stamp}</Td>
                 )}
-                {(canEdit(userType) || canDelete(userType)) && (
+                {(rights.JH_EDIT || rights.JH_DEL) && (
                   <Td>
-                    {canEdit(userType) && row.record_status === "ACTIVE" && (
+                    {rights.JH_EDIT && row.record_status === "ACTIVE" && (
                       <button style={S.btnSmEdit} onClick={() => { setEditRow(row); setSaveErr(""); }}>
                         Edit
                       </button>
                     )}
-                    {canDelete(userType) && row.record_status === "ACTIVE" && (
+                    {rights.JH_DEL && row.record_status === "ACTIVE" && (
                       <button style={S.btnSmDel} onClick={() => setDeleteRow(row)}>
                         Deactivate
                       </button>
@@ -439,7 +436,7 @@ export default function EmployeeDetailPage() {
             {jobHistory.length === 0 && (
               <tr>
                 <td
-                  colSpan={canSeeStamp(userType) ? (canEdit(userType) || canDelete(userType) ? 7 : 6) : (canEdit(userType) || canDelete(userType) ? 6 : 5)}
+                  colSpan={showStamp ? ((rights.JH_EDIT || rights.JH_DEL) ? 7 : 6) : ((rights.JH_EDIT || rights.JH_DEL) ? 6 : 5)}
                   style={S.empty}
                 >
                   No job history records.

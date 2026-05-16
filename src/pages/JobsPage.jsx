@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useRights } from "../context/UserRightsContext";
 import { getJobs, addJob, updateJob, softDeleteJob } from "../services/jobService";
-
-const canAdd = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canEdit = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canDelete = (t) => t === "SUPERADMIN";
-const canSeeStamp = (t) => t === "ADMIN" || t === "SUPERADMIN";
 
 const S = {
   page: { padding: "24px 32px", fontFamily: "sans-serif", color: "#1a1a18" },
@@ -143,7 +139,9 @@ function DeactivateConfirm({ job, onConfirm, onCancel, saving }) {
 
 export default function JobsPage() {
   const { currentUser } = useAuth();
+  const { rights } = useRights();
   const userType = currentUser?.user_type;
+  const showStamp = userType === "ADMIN" || userType === "SUPERADMIN";
 
   const [jobs, setJobs] = useState([]);
   const [loadErr, setLoadErr] = useState("");
@@ -188,13 +186,13 @@ export default function JobsPage() {
     load();
   };
 
-  const colCount = 3 + (canSeeStamp(userType) ? 1 : 0) + (canEdit(userType) || canDelete(userType) ? 1 : 0);
+  const colCount = 3 + (showStamp ? 1 : 0) + (rights.JOB_EDIT || rights.JOB_DEL ? 1 : 0);
 
   return (
     <div style={S.page}>
       <div style={S.header}>
         <h1 style={S.h1}>Jobs</h1>
-        {canAdd(userType) && (
+        {rights.JOB_ADD && (
           <button style={S.btnPrimary} onClick={() => { setShowAdd(true); setSaveErr(""); }}>
             + Add Job
           </button>
@@ -209,8 +207,8 @@ export default function JobsPage() {
             <Th>Job Code</Th>
             <Th>Description</Th>
             <Th>Status</Th>
-            {canSeeStamp(userType) && <Th>Stamp</Th>}
-            {(canEdit(userType) || canDelete(userType)) && <Th>Actions</Th>}
+            {showStamp && <Th>Stamp</Th>}
+            {(rights.JOB_EDIT || rights.JOB_DEL) && <Th>Actions</Th>}
           </tr>
         </thead>
         <tbody>
@@ -221,17 +219,17 @@ export default function JobsPage() {
               <Td>
                 <span style={S.badge(job.record_status)}>{job.record_status}</span>
               </Td>
-              {canSeeStamp(userType) && (
+              {showStamp && (
                 <td style={{ ...S.td, fontSize: 11, color: "#888" }}>{job.stamp}</td>
               )}
-              {(canEdit(userType) || canDelete(userType)) && (
+              {(rights.JOB_EDIT || rights.JOB_DEL) && (
                 <Td>
-                  {canEdit(userType) && job.record_status === "ACTIVE" && (
+                  {rights.JOB_EDIT && job.record_status === "ACTIVE" && (
                     <button style={S.btnSmEdit} onClick={() => { setEditTarget(job); setSaveErr(""); }}>
                       Edit
                     </button>
                   )}
-                  {canDelete(userType) && job.record_status === "ACTIVE" && (
+                  {rights.JOB_DEL && job.record_status === "ACTIVE" && (
                     <button style={S.btnSmDel} onClick={() => setDeleteTarget(job)}>
                       Deactivate
                     </button>
