@@ -23,7 +23,7 @@ CREATE POLICY emp_insert ON public.employee
       SELECT 1 FROM public."UserModule_Rights" umr
       JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr."rightCode" = 'EMP_ADD'
+        AND umr.rightcode = 'EMP_ADD'
         AND umr.right_value = 1
     )
   );
@@ -36,7 +36,7 @@ CREATE POLICY emp_update_edit ON public.employee
       SELECT 1 FROM public."UserModule_Rights" umr
       JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr."rightCode" = 'EMP_EDIT'
+        AND umr.rightcode = 'EMP_EDIT'
         AND umr.right_value = 1
     )
   );
@@ -50,7 +50,7 @@ CREATE POLICY emp_update_deactivate ON public.employee
       SELECT 1 FROM public."UserModule_Rights" umr
       JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr."rightCode" = 'EMP_DEL'
+        AND umr.rightcode = 'EMP_DEL'
         AND umr.right_value = 1
     )
   );
