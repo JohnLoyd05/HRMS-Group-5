@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   getEmployees,
@@ -7,430 +8,327 @@ import {
   softDeleteEmployee,
 } from "../services/employeeService";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// --- Rights helpers ---
+const canAdd = (t) => t === "ADMIN" || t === "SUPERADMIN";
+const canEdit = (t) => t === "ADMIN" || t === "SUPERADMIN";
+const canDelete = (t) => t === "SUPERADMIN";
+const canSeeStamp = (t) => t === "ADMIN" || t === "SUPERADMIN";
 
-function canAdd(userType)    { return userType === "SUPERADMIN" || userType === "ADMIN"; }
-function canEdit(userType)   { return userType === "SUPERADMIN" || userType === "ADMIN"; }
-function canDelete(userType) { return userType === "SUPERADMIN"; }
-function canSeeStamp(userType) { return userType === "SUPERADMIN" || userType === "ADMIN"; }
-
-// ── shared styles (matches project design system) ────────────────────────────
-
+// --- Shared styles ---
 const S = {
-  input: {
-    width: "100%", padding: "9px 12px", border: "1px solid #d0cec8",
-    borderRadius: 8, fontSize: 14, outline: "none", boxSizing: "border-box",
-    background: "#fff", fontFamily: "DM Sans, sans-serif",
-  },
-  label: { fontSize: 12, color: "#666", display: "block", marginBottom: 4 },
-  formGroup: { marginBottom: 14 },
+  page: { padding: "24px 32px", fontFamily: "sans-serif", color: "#1a1a18" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  h1: { fontSize: 22, fontWeight: 700, margin: 0 },
   btnPrimary: {
-    padding: "9px 18px", background: "#1a1a18", color: "#fff",
-    border: "none", borderRadius: 8, fontSize: 13, fontWeight: 500,
-    cursor: "pointer", fontFamily: "DM Sans, sans-serif",
+    padding: "8px 18px", background: "#1a1a18", color: "#fff",
+    border: "none", borderRadius: 8, fontSize: 14, cursor: "pointer",
   },
-  btnSecondary: {
-    padding: "9px 18px", background: "#fff", color: "#1a1a18",
-    border: "1px solid #d0cec8", borderRadius: 8, fontSize: 13, fontWeight: 500,
-    cursor: "pointer", fontFamily: "DM Sans, sans-serif",
+  table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+  th: {
+    textAlign: "left", padding: "8px 12px", background: "#f5f4f0",
+    borderBottom: "2px solid #d0cec8", fontWeight: 600,
   },
-  btnDanger: {
-    padding: "9px 18px", background: "#A32D2D", color: "#fff",
-    border: "none", borderRadius: 8, fontSize: 13, fontWeight: 500,
-    cursor: "pointer", fontFamily: "DM Sans, sans-serif",
+  td: { padding: "8px 12px", borderBottom: "1px solid #ebebeb" },
+  badge: (status) => ({
+    display: "inline-block", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 600,
+    background: status === "ACTIVE" ? "#d4f7dc" : "#fde8e8",
+    color: status === "ACTIVE" ? "#1a7a36" : "#a02020",
+  }),
+  btnSmView: {
+    padding: "4px 10px", background: "#f5f4f0", color: "#1a1a18",
+    border: "1px solid #d0cec8", borderRadius: 6, fontSize: 12,
+    cursor: "pointer", marginRight: 6,
   },
   btnSmEdit: {
-    padding: "4px 10px", background: "#185FA5", color: "#fff",
-    border: "none", borderRadius: 6, fontSize: 12, cursor: "pointer", marginRight: 6,
+    padding: "4px 10px", background: "#e8f0fe", color: "#1a56db",
+    border: "1px solid #c3d4fa", borderRadius: 6, fontSize: 12,
+    cursor: "pointer", marginRight: 6,
   },
   btnSmDel: {
-    padding: "4px 10px", background: "#A32D2D", color: "#fff",
-    border: "none", borderRadius: 6, fontSize: 12, cursor: "pointer",
+    padding: "4px 10px", background: "#fde8e8", color: "#a02020",
+    border: "1px solid #f5c6c6", borderRadius: 6, fontSize: 12, cursor: "pointer",
   },
+  overlay: {
+    position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
+    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+  },
+  modal: {
+    background: "#fff", borderRadius: 12, padding: 28, minWidth: 380,
+    maxWidth: 480, width: "100%", boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+  },
+  modalTitle: { fontSize: 17, fontWeight: 700, marginBottom: 18 },
+  label: { display: "block", fontSize: 12, fontWeight: 600, marginBottom: 4, marginTop: 14 },
+  input: {
+    width: "100%", padding: "8px 10px", borderRadius: 6,
+    border: "1px solid #d0cec8", fontSize: 13, boxSizing: "border-box",
+  },
+  select: {
+    width: "100%", padding: "8px 10px", borderRadius: 6,
+    border: "1px solid #d0cec8", fontSize: 13, boxSizing: "border-box", background: "#fff",
+  },
+  modalFooter: { display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 22 },
+  btnCancel: {
+    padding: "8px 18px", background: "#f5f4f0", color: "#1a1a18",
+    border: "1px solid #d0cec8", borderRadius: 8, fontSize: 13, cursor: "pointer",
+  },
+  btnConfirm: {
+    padding: "8px 18px", background: "#1a1a18", color: "#fff",
+    border: "none", borderRadius: 8, fontSize: 13, cursor: "pointer",
+  },
+  btnDanger: {
+    padding: "8px 18px", background: "#a02020", color: "#fff",
+    border: "none", borderRadius: 8, fontSize: 13, cursor: "pointer",
+  },
+  error: { color: "#a02020", fontSize: 12, marginTop: 10 },
 };
 
-// ── Modal overlay wrapper ─────────────────────────────────────────────────────
+// --- Reusable wrappers ---
+function Th({ children }) {
+  return <th style={S.th}>{children}</th>;
+}
+function Td({ children }) {
+  return <td style={S.td}>{children}</td>;
+}
 
-function Modal({ children, onClose }) {
+function Modal({ title, onClose, children }) {
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,.45)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, padding: 16,
-    }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          background: "#fff", borderRadius: 16, padding: "32px 28px",
-          width: "100%", maxWidth: 480, maxHeight: "90vh",
-          overflowY: "auto", boxShadow: "0 8px 40px rgba(0,0,0,.18)",
-          fontFamily: "DM Sans, sans-serif",
-        }}
-        onClick={e => e.stopPropagation()}
-      >
+    <div style={S.overlay}>
+      <div style={S.modal}>
+        <div style={S.modalTitle}>{title}</div>
         {children}
       </div>
     </div>
   );
 }
 
-// ── Employee form (shared by Add and Edit) ────────────────────────────────────
+// --- Add / Edit form (shared) ---
+function EmployeeForm({ initial = {}, onSave, onCancel, saving }) {
+  const [form, setForm] = useState({
+    lastname: initial.lastname ?? "",
+    firstname: initial.firstname ?? "",
+    gender: initial.gender ?? "",
+    birthdate: initial.birthdate ?? "",
+    hiredate: initial.hiredate ?? "",
+    sepDate: initial.sepDate ?? "",
+  });
+  const [err, setErr] = useState("");
 
-const EMPTY_FORM = {
-  empno: "", lastname: "", firstname: "",
-  gender: "M", birthdate: "", hiredate: "", sepDate: "",
-};
+  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
-function EmployeeForm({ initial = EMPTY_FORM, onSubmit, onCancel, busy, isEdit }) {
-  const [form, setForm] = useState(initial);
-
-  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+  const handleSubmit = () => {
+    if (!form.lastname.trim() || !form.firstname.trim()) {
+      setErr("Last name and first name are required.");
+      return;
+    }
+    setErr("");
+    onSave(form);
+  };
 
   return (
-    <form onSubmit={e => { e.preventDefault(); onSubmit(form); }}>
-      <h2 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 600 }}>
-        {isEdit ? "Edit Employee" : "Add Employee"}
-      </h2>
+    <>
+      <label style={S.label}>Last Name *</label>
+      <input style={S.input} value={form.lastname} onChange={set("lastname")} />
 
-      <div style={S.formGroup}>
-        <label style={S.label}>Employee No. <span style={{ color: "#A32D2D" }}>*</span></label>
-        <input
-          style={{ ...S.input, background: isEdit ? "#f5f4f0" : "#fff" }}
-          value={form.empno}
-          onChange={set("empno")}
-          placeholder="e.g. 00064"
-          maxLength={5}
-          required
-          disabled={isEdit}
-        />
-        {isEdit && <span style={{ fontSize: 11, color: "#999" }}>Employee No. cannot be changed.</span>}
-      </div>
+      <label style={S.label}>First Name *</label>
+      <input style={S.input} value={form.firstname} onChange={set("firstname")} />
 
-      <div style={{ display: "flex", gap: 12 }}>
-        <div style={{ ...S.formGroup, flex: 1 }}>
-          <label style={S.label}>Last Name <span style={{ color: "#A32D2D" }}>*</span></label>
-          <input style={S.input} value={form.lastname} onChange={set("lastname")} placeholder="e.g. Santos" maxLength={15} required />
-        </div>
-        <div style={{ ...S.formGroup, flex: 1 }}>
-          <label style={S.label}>First Name <span style={{ color: "#A32D2D" }}>*</span></label>
-          <input style={S.input} value={form.firstname} onChange={set("firstname")} placeholder="e.g. Maria" maxLength={15} required />
-        </div>
-      </div>
+      <label style={S.label}>Gender</label>
+      <select style={S.select} value={form.gender} onChange={set("gender")}>
+        <option value="">— select —</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
 
-      <div style={S.formGroup}>
-        <label style={S.label}>Gender <span style={{ color: "#A32D2D" }}>*</span></label>
-        <select style={S.input} value={form.gender} onChange={set("gender")} required>
-          <option value="M">Male (M)</option>
-          <option value="F">Female (F)</option>
-        </select>
-      </div>
+      <label style={S.label}>Birthdate</label>
+      <input style={S.input} type="date" value={form.birthdate} onChange={set("birthdate")} />
 
-      <div style={{ display: "flex", gap: 12 }}>
-        <div style={{ ...S.formGroup, flex: 1 }}>
-          <label style={S.label}>Birthdate <span style={{ color: "#A32D2D" }}>*</span></label>
-          <input style={S.input} type="date" value={form.birthdate} onChange={set("birthdate")} required />
-        </div>
-        <div style={{ ...S.formGroup, flex: 1 }}>
-          <label style={S.label}>Hire Date <span style={{ color: "#A32D2D" }}>*</span></label>
-          <input style={S.input} type="date" value={form.hiredate} onChange={set("hiredate")} required />
-        </div>
-      </div>
+      <label style={S.label}>Hire Date</label>
+      <input style={S.input} type="date" value={form.hiredate} onChange={set("hiredate")} />
 
-      <div style={S.formGroup}>
-        <label style={S.label}>Separation Date <span style={{ fontSize: 11, color: "#aaa" }}>(leave blank if still employed)</span></label>
-        <input style={S.input} type="date" value={form.sepDate} onChange={set("sepDate")} />
-      </div>
+      <label style={S.label}>Separation Date</label>
+      <input style={S.input} type="date" value={form.sepDate} onChange={set("sepDate")} />
 
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-        <button type="button" style={S.btnSecondary} onClick={onCancel} disabled={busy}>Cancel</button>
-        <button type="submit" style={S.btnPrimary} disabled={busy}>
-          {busy ? "Saving…" : isEdit ? "Save Changes" : "Add Employee"}
+      {err && <div style={S.error}>{err}</div>}
+
+      <div style={S.modalFooter}>
+        <button style={S.btnCancel} onClick={onCancel} disabled={saving}>Cancel</button>
+        <button style={S.btnConfirm} onClick={handleSubmit} disabled={saving}>
+          {saving ? "Saving…" : "Save"}
         </button>
       </div>
-    </form>
+    </>
   );
 }
 
-// ── Soft Delete Confirm Dialog ────────────────────────────────────────────────
-
-function SoftDeleteConfirmDialog({ employee, onConfirm, onCancel, busy }) {
+// --- Soft-delete confirm dialog ---
+function SoftDeleteConfirmDialog({ emp, onConfirm, onCancel, saving }) {
   return (
-    <Modal onClose={onCancel}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
-        <h2 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 600 }}>Deactivate Employee?</h2>
-        <p style={{ fontSize: 14, color: "#555", margin: "0 0 4px" }}>
-          <strong>{employee.firstname} {employee.lastname}</strong> ({employee.empno})
-        </p>
-        <p style={{ fontSize: 13, color: "#888", margin: "0 0 24px" }}>
-          This will hide the employee and all their job history from regular users.
-          An admin can recover them from Deleted Items.
-        </p>
-        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-          <button style={S.btnSecondary} onClick={onCancel} disabled={busy}>Cancel</button>
-          <button style={S.btnDanger} onClick={onConfirm} disabled={busy}>
-            {busy ? "Deactivating…" : "Yes, Deactivate"}
-          </button>
-        </div>
+    <Modal title="Deactivate Employee" onClose={onCancel}>
+      <p style={{ fontSize: 14, margin: "0 0 8px" }}>
+        Deactivate <strong>{emp.firstname} {emp.lastname}</strong>?
+      </p>
+      <p style={{ fontSize: 13, color: "#666", margin: 0 }}>
+        Their job history will also be deactivated. An admin can recover them later.
+      </p>
+      <div style={S.modalFooter}>
+        <button style={S.btnCancel} onClick={onCancel} disabled={saving}>Cancel</button>
+        <button style={S.btnDanger} onClick={onConfirm} disabled={saving}>
+          {saving ? "Deactivating…" : "Deactivate"}
+        </button>
       </div>
     </Modal>
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
-
+// --- Main page ---
 export default function EmployeesPage() {
   const { currentUser } = useAuth();
   const userType = currentUser?.user_type;
+  const navigate = useNavigate();
 
   const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadErr, setLoadErr] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveErr, setSaveErr] = useState("");
 
-  // Modal state
-  const [showAdd, setShowAdd]               = useState(false);
-  const [editTarget, setEditTarget]         = useState(null);   // employee object or null
-  const [deleteTarget, setDeleteTarget]     = useState(null);   // employee object or null
-  const [busy, setBusy]                     = useState(false);
-  const [toast, setToast]                   = useState("");     // success message
-
-  // ── fetch ──
-  async function fetchEmployees() {
-    setLoading(true);
-    setError("");
+  const load = async () => {
     const { data, error } = await getEmployees(userType);
-    if (error) setError(error.message);
-    else setEmployees(data || []);
-    setLoading(false);
-  }
+    if (error) setLoadErr(error.message);
+    else setEmployees(data ?? []);
+  };
 
-  useEffect(() => { fetchEmployees(); }, []);
+  useEffect(() => { load(); }, []);
 
-  // ── toast helper ──
-  function showToast(msg) {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3000);
-  }
-
-  // ── handlers ──
-  async function handleAdd(form) {
-    setBusy(true);
-    const { error } = await addEmployee(
-      {
-        empno:     form.empno.trim(),
-        lastname:  form.lastname.trim(),
-        firstname: form.firstname.trim(),
-        gender:    form.gender,
-        birthdate: form.birthdate || null,
-        hiredate:  form.hiredate  || null,
-        sepDate:   form.sepDate   || null,
-      },
-      currentUser.id
-    );
-    setBusy(false);
-    if (error) { setError(error.message); return; }
+  const handleAdd = async (form) => {
+    setSaving(true);
+    setSaveErr("");
+    const { error } = await addEmployee(form, currentUser.id);
+    setSaving(false);
+    if (error) { setSaveErr(error.message); return; }
     setShowAdd(false);
-    showToast("Employee added successfully.");
-    fetchEmployees();
-  }
+    load();
+  };
 
-  async function handleEdit(form) {
-    setBusy(true);
-    const { error } = await updateEmployee(
-      editTarget.empno,
-      {
-        lastname:  form.lastname.trim(),
-        firstname: form.firstname.trim(),
-        gender:    form.gender,
-        birthdate: form.birthdate || null,
-        hiredate:  form.hiredate  || null,
-        sepDate:   form.sepDate   || null,
-      },
-      currentUser.id
-    );
-    setBusy(false);
-    if (error) { setError(error.message); return; }
+  const handleEdit = async (form) => {
+    setSaving(true);
+    setSaveErr("");
+    const { error } = await updateEmployee(editTarget.empno, form, currentUser.id);
+    setSaving(false);
+    if (error) { setSaveErr(error.message); return; }
     setEditTarget(null);
-    showToast("Employee updated successfully.");
-    fetchEmployees();
-  }
+    load();
+  };
 
-  async function handleDelete() {
-    setBusy(true);
+  const handleDelete = async () => {
+    setSaving(true);
     const { error } = await softDeleteEmployee(deleteTarget.empno, currentUser.id);
-    setBusy(false);
-    if (error) { setError(error.message); return; }
+    setSaving(false);
+    if (error) { setSaveErr(error.message); return; }
     setDeleteTarget(null);
-    showToast("Employee deactivated. Recoverable from Deleted Items.");
-    fetchEmployees();
-  }
+    load();
+  };
 
-  // ── render ──
   return (
-    <div style={{ fontFamily: "DM Sans, sans-serif" }}>
-
-      {/* Page header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#1a1a18" }}>Employees</h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: "#888" }}>
-            {employees.length} {userType === "USER" ? "active" : "total"} record{employees.length !== 1 ? "s" : ""}
-          </p>
-        </div>
+    <div style={S.page}>
+      <div style={S.header}>
+        <h1 style={S.h1}>Employees</h1>
         {canAdd(userType) && (
-          <button style={S.btnPrimary} onClick={() => setShowAdd(true)}>+ Add Employee</button>
+          <button style={S.btnPrimary} onClick={() => { setShowAdd(true); setSaveErr(""); }}>
+            + Add Employee
+          </button>
         )}
       </div>
 
-      {/* Error banner */}
-      {error && (
-        <div style={{ background: "#FCEBEB", color: "#A32D2D", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>
-          {error}
-        </div>
-      )}
+      {loadErr && <p style={S.error}>{loadErr}</p>}
 
-      {/* Toast */}
-      {toast && (
-        <div style={{ background: "#E6F4EA", color: "#1E6B3E", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>
-          {toast}
-        </div>
-      )}
+      <table style={S.table}>
+        <thead>
+          <tr>
+            <Th>Emp No</Th>
+            <Th>Last Name</Th>
+            <Th>First Name</Th>
+            <Th>Gender</Th>
+            <Th>Hire Date</Th>
+            <Th>Status</Th>
+            {canSeeStamp(userType) && <Th>Stamp</Th>}
+            <Th>Actions</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {employees.map((emp) => (
+            <tr key={emp.empno}>
+              <Td>{emp.empno}</Td>
+              <Td>{emp.lastname}</Td>
+              <Td>{emp.firstname}</Td>
+              <Td>{emp.gender}</Td>
+              <Td>{emp.hiredate}</Td>
+              <Td>
+                <span style={S.badge(emp.record_status)}>{emp.record_status}</span>
+              </Td>
+              {canSeeStamp(userType) && <Td style={{ fontSize: 11, color: "#888" }}>{emp.stamp}</Td>}
+              <Td>
+                <button
+                  style={S.btnSmView}
+                  onClick={() => navigate(`/employees/${emp.empno}`)}
+                >
+                  View
+                </button>
+                {canEdit(userType) && emp.record_status === "ACTIVE" && (
+                  <button style={S.btnSmEdit} onClick={() => { setEditTarget(emp); setSaveErr(""); }}>
+                    Edit
+                  </button>
+                )}
+                {canDelete(userType) && emp.record_status === "ACTIVE" && (
+                  <button style={S.btnSmDel} onClick={() => setDeleteTarget(emp)}>
+                    Deactivate
+                  </button>
+                )}
+              </Td>
+            </tr>
+          ))}
+          {employees.length === 0 && !loadErr && (
+            <tr>
+              <td colSpan={canSeeStamp(userType) ? 8 : 7} style={{ ...S.td, textAlign: "center", color: "#888" }}>
+                No employees found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
 
-      {/* Table */}
-      <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e8e4dd", overflow: "hidden" }}>
-        {loading ? (
-          <div style={{ padding: 40, textAlign: "center", color: "#888", fontSize: 14 }}>Loading employees…</div>
-        ) : employees.length === 0 ? (
-          <div style={{ padding: 40, textAlign: "center", color: "#888", fontSize: 14 }}>No employees found.</div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: "#f5f4f0", borderBottom: "1px solid #e8e4dd" }}>
-                  <Th>Emp No.</Th>
-                  <Th>Last Name</Th>
-                  <Th>First Name</Th>
-                  <Th>Gender</Th>
-                  <Th>Hire Date</Th>
-                  <Th>Sep. Date</Th>
-                  {canSeeStamp(userType) && <Th>Status</Th>}
-                  {canSeeStamp(userType) && <Th>Stamp</Th>}
-                  {(canEdit(userType) || canDelete(userType)) && <Th>Actions</Th>}
-                </tr>
-              </thead>
-              <tbody>
-                {employees.map((emp, i) => (
-                  <tr
-                    key={emp.empno}
-                    style={{
-                      borderBottom: "1px solid #f0ede8",
-                      background: emp.record_status === "INACTIVE" ? "#fff8f8" : (i % 2 === 0 ? "#fff" : "#fafaf9"),
-                    }}
-                  >
-                    <Td><span style={{ fontWeight: 600, color: "#185FA5" }}>{emp.empno}</span></Td>
-                    <Td>{emp.lastname}</Td>
-                    <Td>{emp.firstname}</Td>
-                    <Td>{emp.gender === "M" ? "Male" : "Female"}</Td>
-                    <Td>{emp.hiredate ? formatDate(emp.hiredate) : "—"}</Td>
-                    <Td>{emp.sepDate  ? formatDate(emp.sepDate)  : <span style={{ color: "#aaa" }}>Active</span>}</Td>
-                    {canSeeStamp(userType) && (
-                      <Td>
-                        <span style={{
-                          display: "inline-block", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 500,
-                          background: emp.record_status === "ACTIVE" ? "#E6F4EA" : "#FCEBEB",
-                          color:      emp.record_status === "ACTIVE" ? "#1E6B3E" : "#A32D2D",
-                        }}>
-                          {emp.record_status}
-                        </span>
-                      </Td>
-                    )}
-                    {canSeeStamp(userType) && (
-                      <Td><span style={{ fontSize: 11, color: "#aaa", fontFamily: "monospace" }}>{emp.stamp || "—"}</span></Td>
-                    )}
-                    {(canEdit(userType) || canDelete(userType)) && (
-                      <Td>
-                        {canEdit(userType) && emp.record_status === "ACTIVE" && (
-                          <button style={S.btnSmEdit} onClick={() => setEditTarget(emp)}>Edit</button>
-                        )}
-                        {canDelete(userType) && emp.record_status === "ACTIVE" && (
-                          <button style={S.btnSmDel} onClick={() => setDeleteTarget(emp)}>Deactivate</button>
-                        )}
-                      </Td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* ── Modals ── */}
-
+      {/* Add modal */}
       {showAdd && (
-        <Modal onClose={() => setShowAdd(false)}>
-          <EmployeeForm
-            onSubmit={handleAdd}
-            onCancel={() => setShowAdd(false)}
-            busy={busy}
-            isEdit={false}
-          />
+        <Modal title="Add Employee" onClose={() => setShowAdd(false)}>
+          <EmployeeForm onSave={handleAdd} onCancel={() => setShowAdd(false)} saving={saving} />
+          {saveErr && <div style={S.error}>{saveErr}</div>}
         </Modal>
       )}
 
+      {/* Edit modal */}
       {editTarget && (
-        <Modal onClose={() => setEditTarget(null)}>
+        <Modal title="Edit Employee" onClose={() => setEditTarget(null)}>
           <EmployeeForm
-            initial={{
-              empno:     editTarget.empno,
-              lastname:  editTarget.lastname  || "",
-              firstname: editTarget.firstname || "",
-              gender:    editTarget.gender    || "M",
-              birthdate: editTarget.birthdate || "",
-              hiredate:  editTarget.hiredate  || "",
-              sepDate:   editTarget.sepDate   || "",
-            }}
-            onSubmit={handleEdit}
+            initial={editTarget}
+            onSave={handleEdit}
             onCancel={() => setEditTarget(null)}
-            busy={busy}
-            isEdit={true}
+            saving={saving}
           />
+          {saveErr && <div style={S.error}>{saveErr}</div>}
         </Modal>
       )}
 
+      {/* Soft-delete confirm */}
       {deleteTarget && (
         <SoftDeleteConfirmDialog
-          employee={deleteTarget}
+          emp={deleteTarget}
           onConfirm={handleDelete}
           onCancel={() => setDeleteTarget(null)}
-          busy={busy}
+          saving={saving}
         />
       )}
     </div>
   );
-}
-
-// ── tiny table cell components ────────────────────────────────────────────────
-
-function Th({ children }) {
-  return (
-    <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, fontSize: 12, color: "#555", whiteSpace: "nowrap" }}>
-      {children}
-    </th>
-  );
-}
-
-function Td({ children }) {
-  return (
-    <td style={{ padding: "10px 14px", color: "#333", verticalAlign: "middle" }}>
-      {children}
-    </td>
-  );
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
