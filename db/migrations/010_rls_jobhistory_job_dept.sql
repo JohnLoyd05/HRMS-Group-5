@@ -18,7 +18,7 @@ CREATE POLICY jh_select ON public.jobhistory
     record_status = 'ACTIVE'
     OR EXISTS (
       SELECT 1 FROM public."user"
-      WHERE id = auth.uid()
+      WHERE id::uuid = auth.uid()
         AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
@@ -28,9 +28,9 @@ CREATE POLICY jh_insert ON public.jobhistory
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'JH_ADD'
+        AND umr."rightCode" = 'JH_ADD'
         AND umr.right_value = 1
     )
   );
@@ -40,9 +40,9 @@ CREATE POLICY jh_update_edit ON public.jobhistory
   USING (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'JH_EDIT'
+        AND umr."rightCode" = 'JH_EDIT'
         AND umr.right_value = 1
     )
   );
@@ -53,9 +53,9 @@ CREATE POLICY jh_update_deactivate ON public.jobhistory
     record_status = 'ACTIVE'
     AND EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'JH_DEL'
+        AND umr."rightCode" = 'JH_DEL'
         AND umr.right_value = 1
     )
   );
@@ -66,7 +66,7 @@ CREATE POLICY jh_update_recover ON public.jobhistory
     record_status = 'INACTIVE'
     AND EXISTS (
       SELECT 1 FROM public."user"
-      WHERE id = auth.uid()
+      WHERE id::uuid = auth.uid()
         AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
@@ -81,7 +81,7 @@ CREATE POLICY job_select ON public.job
     record_status = 'ACTIVE'
     OR EXISTS (
       SELECT 1 FROM public."user"
-      WHERE id = auth.uid()
+      WHERE id::uuid = auth.uid()
         AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
@@ -91,9 +91,9 @@ CREATE POLICY job_insert ON public.job
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'JOB_ADD'
+        AND umr."rightCode" = 'JOB_ADD'
         AND umr.right_value = 1
     )
   );
@@ -103,9 +103,9 @@ CREATE POLICY job_update_edit ON public.job
   USING (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'JOB_EDIT'
+        AND umr."rightCode" = 'JOB_EDIT'
         AND umr.right_value = 1
     )
   );
@@ -116,9 +116,9 @@ CREATE POLICY job_update_deactivate ON public.job
     record_status = 'ACTIVE'
     AND EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'JOB_DEL'
+        AND umr."rightCode" = 'JOB_DEL'
         AND umr.right_value = 1
     )
   );
@@ -129,7 +129,7 @@ CREATE POLICY job_update_recover ON public.job
     record_status = 'INACTIVE'
     AND EXISTS (
       SELECT 1 FROM public."user"
-      WHERE id = auth.uid()
+      WHERE id::uuid = auth.uid()
         AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
@@ -144,7 +144,7 @@ CREATE POLICY dept_select ON public.department
     record_status = 'ACTIVE'
     OR EXISTS (
       SELECT 1 FROM public."user"
-      WHERE id = auth.uid()
+      WHERE id::uuid = auth.uid()
         AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
@@ -154,9 +154,9 @@ CREATE POLICY dept_insert ON public.department
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'DEPT_ADD'
+        AND umr."rightCode" = 'DEPT_ADD'
         AND umr.right_value = 1
     )
   );
@@ -166,9 +166,9 @@ CREATE POLICY dept_update_edit ON public.department
   USING (
     EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'DEPT_EDIT'
+        AND umr."rightCode" = 'DEPT_EDIT'
         AND umr.right_value = 1
     )
   );
@@ -179,9 +179,9 @@ CREATE POLICY dept_update_deactivate ON public.department
     record_status = 'ACTIVE'
     AND EXISTS (
       SELECT 1 FROM public."UserModule_Rights" umr
-      JOIN public."user" u ON u.id = auth.uid()
+      JOIN public."user" u ON u.id::uuid = auth.uid()
       WHERE umr.user_id = u.id
-        AND umr.rightcode = 'DEPT_DEL'
+        AND umr."rightCode" = 'DEPT_DEL'
         AND umr.right_value = 1
     )
   );
@@ -192,7 +192,7 @@ CREATE POLICY dept_update_recover ON public.department
     record_status = 'INACTIVE'
     AND EXISTS (
       SELECT 1 FROM public."user"
-      WHERE id = auth.uid()
+      WHERE id::uuid = auth.uid()
         AND user_type IN ('ADMIN', 'SUPERADMIN')
     )
   );
