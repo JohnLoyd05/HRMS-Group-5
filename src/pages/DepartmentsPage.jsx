@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useRights } from "../context/UserRightsContext";
 import { getDepts, addDept, updateDept, softDeleteDept } from "../services/departmentService";
-
-const canAdd = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canEdit = (t) => t === "ADMIN" || t === "SUPERADMIN";
-const canDelete = (t) => t === "SUPERADMIN";
-const canSeeStamp = (t) => t === "ADMIN" || t === "SUPERADMIN";
 
 const S = {
   page: { padding: "24px 32px", fontFamily: "sans-serif", color: "#1a1a18" },
@@ -143,7 +139,9 @@ function DeactivateConfirm({ dept, onConfirm, onCancel, saving }) {
 
 export default function DepartmentsPage() {
   const { currentUser } = useAuth();
+  const { rights } = useRights();
   const userType = currentUser?.user_type;
+  const showStamp = userType === "ADMIN" || userType === "SUPERADMIN";
 
   const [depts, setDepts] = useState([]);
   const [loadErr, setLoadErr] = useState("");
@@ -188,13 +186,13 @@ export default function DepartmentsPage() {
     load();
   };
 
-  const colCount = 3 + (canSeeStamp(userType) ? 1 : 0) + (canEdit(userType) || canDelete(userType) ? 1 : 0);
+  const colCount = 3 + (showStamp ? 1 : 0) + (rights.DEPT_EDIT || rights.DEPT_DEL ? 1 : 0);
 
   return (
     <div style={S.page}>
       <div style={S.header}>
         <h1 style={S.h1}>Departments</h1>
-        {canAdd(userType) && (
+        {rights.DEPT_ADD && (
           <button style={S.btnPrimary} onClick={() => { setShowAdd(true); setSaveErr(""); }}>
             + Add Department
           </button>
@@ -209,8 +207,8 @@ export default function DepartmentsPage() {
             <Th>Dept Code</Th>
             <Th>Name</Th>
             <Th>Status</Th>
-            {canSeeStamp(userType) && <Th>Stamp</Th>}
-            {(canEdit(userType) || canDelete(userType)) && <Th>Actions</Th>}
+            {showStamp && <Th>Stamp</Th>}
+            {(rights.DEPT_EDIT || rights.DEPT_DEL) && <Th>Actions</Th>}
           </tr>
         </thead>
         <tbody>
@@ -221,17 +219,17 @@ export default function DepartmentsPage() {
               <Td>
                 <span style={S.badge(dept.record_status)}>{dept.record_status}</span>
               </Td>
-              {canSeeStamp(userType) && (
+              {showStamp && (
                 <td style={{ ...S.td, fontSize: 11, color: "#888" }}>{dept.stamp}</td>
               )}
-              {(canEdit(userType) || canDelete(userType)) && (
+              {(rights.DEPT_EDIT || rights.DEPT_DEL) && (
                 <Td>
-                  {canEdit(userType) && dept.record_status === "ACTIVE" && (
+                  {rights.DEPT_EDIT && dept.record_status === "ACTIVE" && (
                     <button style={S.btnSmEdit} onClick={() => { setEditTarget(dept); setSaveErr(""); }}>
                       Edit
                     </button>
                   )}
-                  {canDelete(userType) && dept.record_status === "ACTIVE" && (
+                  {rights.DEPT_DEL && dept.record_status === "ACTIVE" && (
                     <button style={S.btnSmDel} onClick={() => setDeleteTarget(dept)}>
                       Deactivate
                     </button>

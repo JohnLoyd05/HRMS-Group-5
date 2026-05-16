@@ -12,6 +12,7 @@ import DepartmentsPage from './pages/DepartmentsPage';
 import ReportsPage from './pages/ReportsPage';
 import DeletedItemsPage from './pages/DeletedItemsPage';
 import AdminPage from './pages/AdminPage';
+import EmployeeDetailPage from './pages/EmployeeDetailPage';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
       >
         <Route index element={<Navigate to="/employees" />} />
         <Route path="employees" element={<EmployeesPage />} />
+        <Route path="employees/:empno" element={<EmployeeDetailPage />} />
         <Route path="jobhistory" element={<JobHistoryPage />} />
         <Route path="jobs" element={<JobsPage />} />
         <Route path="departments" element={<DepartmentsPage />} />
