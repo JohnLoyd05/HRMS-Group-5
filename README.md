@@ -55,6 +55,38 @@ A web-based HR System built with React 18, Vite, Tailwind CSS, and Supabase.
    npm run dev
 ```
 
+5. Run tests
+```bash
+   npm test
+```
+
+---
+
+## Google OAuth Setup (Local Development)
+
+When testing Google sign-in locally, the redirect URL must be registered in both Google Cloud Console and Supabase Dashboard.
+
+Add this URL to your allowed redirect list:
+```
+http://localhost:5173/auth/callback
+```
+
+**Steps:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) → your project → APIs & Services → Credentials
+2. Under your OAuth 2.0 Client ID, add `http://localhost:5173/auth/callback` to **Authorized redirect URIs**
+3. In Supabase Dashboard → Authentication → URL Configuration, add the same URL under **Redirect URLs**
+
+> For production, replace `http://localhost:5173` with your deployed app URL (e.g. Vercel/Netlify URL).
+
+---
+
+## Database
+
+- **Supabase Project URL:** _(https://ssbhsyqaddhaqepispzh.supabase.co)_
+- **ERD & Schema Docs:** [docs/db-erd.md](docs/db-erd.md)
+
+The database uses four HR tables from HopeDB (`employee`, `jobHistory`, `job`, `department`) with added `record_status` and `stamp` columns for soft-delete and audit trail support.
+
 ---
 
 ## Branching Strategy
