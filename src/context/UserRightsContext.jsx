@@ -20,13 +20,13 @@ export function UserRightsProvider({ children }) {
       setRightsLoading(true)
       const { data, error } = await supabase
         .from('UserModule_Rights')
-        .select('rightCode, right_value')
+        .select('rightcode, right_value')
         .eq('user_id', currentUser.id)
 
       if (!error && data) {
         const map = {}
-        data.forEach(({ rightCode, right_value }) => {
-          map[rightCode] = right_value === 1
+        data.forEach(({ rightcode, right_value }) => {
+          map[rightcode] = right_value === 1
         })
         setRights(map)
       }
