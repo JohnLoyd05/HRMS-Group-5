@@ -145,6 +145,7 @@ export default function DepartmentsPage() {
 
   const [depts, setDepts] = useState([]);
   const [loadErr, setLoadErr] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -152,9 +153,11 @@ export default function DepartmentsPage() {
   const [saveErr, setSaveErr] = useState("");
 
   const load = async () => {
+    setLoading(true);
     const { data, error } = await getDepts(userType);
     if (error) setLoadErr(error.message);
     else setDepts(data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -201,6 +204,7 @@ export default function DepartmentsPage() {
 
       {loadErr && <p style={S.error}>{loadErr}</p>}
 
+      <div style={{ overflowX: "auto" }}>
       <table style={S.table}>
         <thead>
           <tr>
@@ -238,15 +242,23 @@ export default function DepartmentsPage() {
               )}
             </tr>
           ))}
-          {depts.length === 0 && !loadErr && (
+          {loading && (
             <tr>
               <td colSpan={colCount} style={{ ...S.td, textAlign: "center", color: "#888" }}>
-                No departments found.
+                Loading…
+              </td>
+            </tr>
+          )}
+          {!loading && depts.length === 0 && !loadErr && (
+            <tr>
+              <td colSpan={colCount} style={{ ...S.td, textAlign: "center", color: "#888" }}>
+                No records found.
               </td>
             </tr>
           )}
         </tbody>
       </table>
+      </div>
 
       {showAdd && (
         <Modal title="Add Department">
