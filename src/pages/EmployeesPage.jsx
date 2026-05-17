@@ -185,6 +185,7 @@ export default function EmployeesPage() {
 
   const [employees, setEmployees] = useState([]);
   const [loadErr, setLoadErr] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -192,9 +193,11 @@ export default function EmployeesPage() {
   const [saveErr, setSaveErr] = useState("");
 
   const load = async () => {
+    setLoading(true);
     const { data, error } = await getEmployees(userType);
     if (error) setLoadErr(error.message);
     else setEmployees(data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -241,6 +244,7 @@ export default function EmployeesPage() {
 
       {loadErr && <p style={S.error}>{loadErr}</p>}
 
+      <div style={{ overflowX: "auto" }}>
       <table style={S.table}>
         <thead>
           <tr>
@@ -286,15 +290,23 @@ export default function EmployeesPage() {
               </Td>
             </tr>
           ))}
-          {employees.length === 0 && !loadErr && (
+          {loading && (
             <tr>
               <td colSpan={showStamp ? 8 : 7} style={{ ...S.td, textAlign: "center", color: "#888" }}>
-                No employees found.
+                Loading…
+              </td>
+            </tr>
+          )}
+          {!loading && employees.length === 0 && !loadErr && (
+            <tr>
+              <td colSpan={showStamp ? 8 : 7} style={{ ...S.td, textAlign: "center", color: "#888" }}>
+                No records found.
               </td>
             </tr>
           )}
         </tbody>
       </table>
+      </div>
 
       {/* Add modal */}
       {showAdd && (

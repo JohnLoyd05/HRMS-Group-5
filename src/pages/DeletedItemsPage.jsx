@@ -39,12 +39,15 @@ function Td({ children }) { return <td style={S.td}>{children}</td>; }
 function DeletedEmployees({ userId }) {
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
   const [recovering, setRecovering] = useState(null);
 
   const load = async () => {
+    setLoading(true);
     const { data, error } = await getEmployees("SUPERADMIN");
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(error.message); setLoading(false); return; }
     setRows((data ?? []).filter((r) => r.record_status === "INACTIVE"));
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -92,8 +95,11 @@ function DeletedEmployees({ userId }) {
               </Td>
             </tr>
           ))}
-          {rows.length === 0 && !err && (
-            <tr><td colSpan={7} style={S.empty}>No deactivated employees.</td></tr>
+          {loading && (
+            <tr><td colSpan={7} style={S.empty}>Loading…</td></tr>
+          )}
+          {!loading && rows.length === 0 && !err && (
+            <tr><td colSpan={7} style={S.empty}>No records found.</td></tr>
           )}
         </tbody>
       </table>
@@ -105,12 +111,13 @@ function DeletedEmployees({ userId }) {
 function DeletedJobHistory({ userId }) {
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
   const [recovering, setRecovering] = useState(null);
 
   const load = async () => {
-    // Fetch all employees to get all empNo values
+    setLoading(true);
     const { data: emps, error: empErr } = await getEmployees("SUPERADMIN");
-    if (empErr) { setErr(empErr.message); return; }
+    if (empErr) { setErr(empErr.message); setLoading(false); return; }
 
     const results = await Promise.all(
       (emps ?? []).map((e) => getJobHistory(e.empno, "SUPERADMIN"))
@@ -118,6 +125,7 @@ function DeletedJobHistory({ userId }) {
 
     const all = results.flatMap((r) => r.data ?? []);
     setRows(all.filter((r) => r.record_status === "INACTIVE"));
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -169,8 +177,11 @@ function DeletedJobHistory({ userId }) {
               </tr>
             );
           })}
-          {rows.length === 0 && !err && (
-            <tr><td colSpan={7} style={S.empty}>No deactivated job history records.</td></tr>
+          {loading && (
+            <tr><td colSpan={7} style={S.empty}>Loading…</td></tr>
+          )}
+          {!loading && rows.length === 0 && !err && (
+            <tr><td colSpan={7} style={S.empty}>No records found.</td></tr>
           )}
         </tbody>
       </table>
@@ -182,12 +193,15 @@ function DeletedJobHistory({ userId }) {
 function DeletedJobs({ userId }) {
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
   const [recovering, setRecovering] = useState(null);
 
   const load = async () => {
+    setLoading(true);
     const { data, error } = await getJobs("SUPERADMIN");
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(error.message); setLoading(false); return; }
     setRows((data ?? []).filter((r) => r.record_status === "INACTIVE"));
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -229,8 +243,11 @@ function DeletedJobs({ userId }) {
               </Td>
             </tr>
           ))}
-          {rows.length === 0 && !err && (
-            <tr><td colSpan={4} style={S.empty}>No deactivated jobs.</td></tr>
+          {loading && (
+            <tr><td colSpan={4} style={S.empty}>Loading…</td></tr>
+          )}
+          {!loading && rows.length === 0 && !err && (
+            <tr><td colSpan={4} style={S.empty}>No records found.</td></tr>
           )}
         </tbody>
       </table>
@@ -242,12 +259,15 @@ function DeletedJobs({ userId }) {
 function DeletedDepts({ userId }) {
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
   const [recovering, setRecovering] = useState(null);
 
   const load = async () => {
+    setLoading(true);
     const { data, error } = await getDepts("SUPERADMIN");
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(error.message); setLoading(false); return; }
     setRows((data ?? []).filter((r) => r.record_status === "INACTIVE"));
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -289,8 +309,11 @@ function DeletedDepts({ userId }) {
               </Td>
             </tr>
           ))}
-          {rows.length === 0 && !err && (
-            <tr><td colSpan={4} style={S.empty}>No deactivated departments.</td></tr>
+          {loading && (
+            <tr><td colSpan={4} style={S.empty}>Loading…</td></tr>
+          )}
+          {!loading && rows.length === 0 && !err && (
+            <tr><td colSpan={4} style={S.empty}>No records found.</td></tr>
           )}
         </tbody>
       </table>
