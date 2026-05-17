@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useRights } from "../context/UserRightsContext";
 import { supabase } from "../lib/supabaseClient";
 
 export default function AppShell() {
   const { currentUser } = useAuth();
+  const { rights } = useRights();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,10 +25,8 @@ export default function AppShell() {
     { id: "jobs",         label: "Jobs",         icon: "💼" },
     { id: "departments",  label: "Departments",  icon: "🏢" },
     { id: "reports",      label: "Reports",      icon: "📊" },
-    ...(userType !== "USER" ? [
-      { id: "deleted-items", label: "Deleted Items", icon: "🗑️" },
-      { id: "admin",         label: "Admin",         icon: "⚙️" },
-    ] : []),
+    ...(userType !== "USER" ? [{ id: "deleted-items", label: "Deleted Items", icon: "🗑️" }] : []),
+    ...(rights.ADM_USER ? [{ id: "admin", label: "Admin", icon: "⚙️" }] : []),
   ];
 
   const handleNav = (id) => {
