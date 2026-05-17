@@ -4,7 +4,6 @@ function makeStamp(action, userId) {
   return `${action} by ${userId} at ${new Date().toISOString()}`
 }
 
-// GET all users (ADMIN/SUPERADMIN only)
 export async function getUsers() {
   const { data, error } = await supabase
     .from('user')
@@ -13,7 +12,6 @@ export async function getUsers() {
   return { data, error }
 }
 
-// ACTIVATE user — blocks SUPERADMIN rows
 export async function activateUser(userId, currentUserId) {
   const { data: target } = await supabase
     .from('user')
@@ -33,7 +31,6 @@ export async function activateUser(userId, currentUserId) {
   return { error }
 }
 
-// DEACTIVATE user — blocks SUPERADMIN rows
 export async function deactivateUser(userId, currentUserId) {
   const { data: target } = await supabase
     .from('user')

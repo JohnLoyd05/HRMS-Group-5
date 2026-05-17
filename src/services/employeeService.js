@@ -1,13 +1,9 @@
-// src/services/employeeService.js
-
 import { supabase } from '../lib/supabaseClient';
 
-// Helper to build audit stamp string
 function makeStamp(action, userId) {
   return `${action} by ${userId} at ${new Date().toISOString()}`;
 }
 
-// GET — USER sees ACTIVE only; ADMIN/SUPERADMIN see all
 export async function getEmployees(userType) {
   let query = supabase
     .from('employee')
@@ -18,7 +14,6 @@ export async function getEmployees(userType) {
   return { data, error };
 }
 
-// Get next available empno (max existing + 1, zero-padded to 5 digits)
 export async function getNextEmpno() {
   const { data, error } = await supabase
     .from('employee')
@@ -31,7 +26,6 @@ export async function getNextEmpno() {
   return { empno: next, error: null };
 }
 
-// ADD
 export async function addEmployee(employeeData, userId) {
   const stamp = makeStamp('CREATED', userId);
   const { data, error } = await supabase
@@ -40,7 +34,6 @@ export async function addEmployee(employeeData, userId) {
   return { data, error };
 }
 
-// EDIT
 export async function updateEmployee(empno, updates, userId) {
   const stamp = makeStamp('UPDATED', userId);
   const { data, error } = await supabase
@@ -50,7 +43,6 @@ export async function updateEmployee(empno, updates, userId) {
   return { data, error };
 }
 
-// SOFT DELETE — cascade trigger on DB side handles jobHistory
 export async function softDeleteEmployee(empno, userId) {
   const stamp = makeStamp('DEACTIVATED', userId);
   const { error } = await supabase
@@ -60,7 +52,6 @@ export async function softDeleteEmployee(empno, userId) {
   return { error };
 }
 
-// RECOVER — cascade trigger restores jobHistory too
 export async function recoverEmployee(empno, userId) {
   const stamp = makeStamp('REACTIVATED', userId);
   const { error } = await supabase

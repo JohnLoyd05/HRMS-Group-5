@@ -20,13 +20,11 @@ function App() {
   return (
     <Routes>
 
-      {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/inactive" element={<InactivePage />} />
 
-      {/* Protected Routes — all wrapped in AppShell layout */}
       <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/employees" element={<EmployeesPage />} />
         <Route path="/employees/:empno" element={<EmployeeDetailPage />} />

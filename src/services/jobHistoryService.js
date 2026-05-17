@@ -4,7 +4,6 @@ function makeStamp(action, userId) {
   return `${action} by ${userId} at ${new Date().toISOString()}`;
 }
 
-// GET — USER sees ACTIVE rows only; ADMIN/SUPERADMIN see all
 export async function getJobHistory(empNo, userType) {
   let query = supabase
     .from('jobhistory')
@@ -16,7 +15,6 @@ export async function getJobHistory(empNo, userType) {
   return { data, error };
 }
 
-// ADD
 export async function addJobHistory(rowData, userId) {
   const stamp = makeStamp('CREATED', userId);
   const { data, error } = await supabase
@@ -25,7 +23,6 @@ export async function addJobHistory(rowData, userId) {
   return { data, error };
 }
 
-// EDIT — must use all 3 composite PK fields
 export async function updateJobHistory(empNo, jobCode, effDate, updates, userId) {
   const stamp = makeStamp('UPDATED', userId);
   const { data, error } = await supabase
@@ -37,7 +34,6 @@ export async function updateJobHistory(empNo, jobCode, effDate, updates, userId)
   return { data, error };
 }
 
-// SOFT DELETE
 export async function softDeleteJobHistory(empNo, jobCode, effDate, userId) {
   const stamp = makeStamp('DEACTIVATED', userId);
   const { error } = await supabase
@@ -49,7 +45,6 @@ export async function softDeleteJobHistory(empNo, jobCode, effDate, userId) {
   return { error };
 }
 
-// RECOVER
 export async function recoverJobHistory(empNo, jobCode, effDate, userId) {
   const stamp = makeStamp('REACTIVATED', userId);
   const { error } = await supabase

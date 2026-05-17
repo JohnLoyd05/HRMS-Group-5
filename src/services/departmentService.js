@@ -4,7 +4,6 @@ function makeStamp(action, userId) {
   return `${action} by ${userId} at ${new Date().toISOString()}`;
 }
 
-// GET — USER sees ACTIVE only; ADMIN/SUPERADMIN see all
 export async function getDepts(userType) {
   let query = supabase
     .from('department')
@@ -15,7 +14,6 @@ export async function getDepts(userType) {
   return { data, error };
 }
 
-// ADD
 export async function addDept(deptData, userId) {
   const stamp = makeStamp('CREATED', userId);
   const { data, error } = await supabase
@@ -24,7 +22,6 @@ export async function addDept(deptData, userId) {
   return { data, error };
 }
 
-// EDIT
 export async function updateDept(deptCode, updates, userId) {
   const stamp = makeStamp('UPDATED', userId);
   const { data, error } = await supabase
@@ -34,7 +31,6 @@ export async function updateDept(deptCode, updates, userId) {
   return { data, error };
 }
 
-// SOFT DELETE
 export async function softDeleteDept(deptCode, userId) {
   const stamp = makeStamp('DEACTIVATED', userId);
   const { error } = await supabase
@@ -44,7 +40,6 @@ export async function softDeleteDept(deptCode, userId) {
   return { error };
 }
 
-// RECOVER
 export async function recoverDept(deptCode, userId) {
   const stamp = makeStamp('REACTIVATED', userId);
   const { error } = await supabase
