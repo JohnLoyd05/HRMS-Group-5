@@ -1,6 +1,6 @@
 -- 012_views_reports.sql
 -- HR Report Views: headcount by department and salary summary by job
-
+-- pr fix
 CREATE OR REPLACE VIEW public.headcount_by_dept AS
 SELECT
   d.deptcode,
