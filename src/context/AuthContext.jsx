@@ -12,6 +12,8 @@ export function AuthProvider({ children }) {
   const navigateRef = useRef(navigate)
   useEffect(() => { navigateRef.current = navigate }, [navigate])
   const inactiveSignOutRef = useRef(false)
+  const currentUserRef = useRef(null)
+  useEffect(() => { currentUserRef.current = currentUser }, [currentUser])
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -41,8 +43,8 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
-          if (event === 'INITIAL_SESSION' && currentUser?.id === session.user.id) return
+        if (event === 'SIGNED_IN' && session?.user) {
+          if (currentUserRef.current?.id === session.user.id) return
 
           const { data: userRow, error } = await supabase
             .from('user')
@@ -64,6 +66,34 @@ export function AuthProvider({ children }) {
             setSession(session)
             setCurrentUser({ ...session.user, ...userRow })
             navigateRef.current('/employees')
+          } else if (userRow?.record_status === 'INACTIVE') {
+            inactiveSignOutRef.current = true
+            await supabase.auth.signOut()
+            setCurrentUser(null)
+            setSession(null)
+            navigateRef.current('/inactive')
+          }
+        } else if (event === 'INITIAL_SESSION' && session?.user) {
+          if (currentUserRef.current?.id === session.user.id) return
+
+          const { data: userRow, error } = await supabase
+            .from('user')
+            .select('record_status, user_type, username')
+            .eq('id', session.user.id)
+            .single()
+
+          if (error || !userRow) {
+            inactiveSignOutRef.current = true
+            await supabase.auth.signOut()
+            setCurrentUser(null)
+            setSession(null)
+            navigateRef.current('/inactive')
+            return
+          }
+
+          if (userRow?.record_status === 'ACTIVE') {
+            setSession(session)
+            setCurrentUser({ ...session.user, ...userRow })
           } else if (userRow?.record_status === 'INACTIVE') {
             inactiveSignOutRef.current = true
             await supabase.auth.signOut()
