@@ -18,6 +18,19 @@ export async function getEmployees(userType) {
   return { data, error };
 }
 
+// Get next available empno (max existing + 1, zero-padded to 5 digits)
+export async function getNextEmpno() {
+  const { data, error } = await supabase
+    .from('employee')
+    .select('empno')
+    .order('empno', { ascending: false })
+    .limit(1);
+  if (error) return { empno: null, error };
+  const max = data?.[0]?.empno ? parseInt(data[0].empno, 10) : 0;
+  const next = String(max + 1).padStart(5, '0');
+  return { empno: next, error: null };
+}
+
 // ADD
 export async function addEmployee(employeeData, userId) {
   const stamp = makeStamp('CREATED', userId);

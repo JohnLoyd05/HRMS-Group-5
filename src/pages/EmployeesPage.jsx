@@ -7,6 +7,7 @@ import {
   addEmployee,
   updateEmployee,
   softDeleteEmployee,
+  getNextEmpno,
 } from "../services/employeeService";
 
 // --- Shared styles ---
@@ -98,7 +99,9 @@ function Modal({ title, onClose, children }) {
 
 // --- Add / Edit form (shared) ---
 function EmployeeForm({ initial = {}, onSave, onCancel, saving }) {
+  const isEdit = !!initial._isEdit;
   const [form, setForm] = useState({
+    empno: initial.empno ?? "",
     lastname: initial.lastname ?? "",
     firstname: initial.firstname ?? "",
     gender: initial.gender ?? "",
@@ -121,6 +124,13 @@ function EmployeeForm({ initial = {}, onSave, onCancel, saving }) {
 
   return (
     <>
+      <label style={S.label}>Employee No.</label>
+      <input
+        style={{ ...S.input, background: "#f5f4f0", color: "#888" }}
+        value={form.empno}
+        readOnly
+      />
+
       <label style={S.label}>Last Name *</label>
       <input style={S.input} value={form.lastname} onChange={set("lastname")} />
 
@@ -130,8 +140,8 @@ function EmployeeForm({ initial = {}, onSave, onCancel, saving }) {
       <label style={S.label}>Gender</label>
       <select style={S.select} value={form.gender} onChange={set("gender")}>
         <option value="">— select —</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
+        <option value="M">Male</option>
+        <option value="F">Female</option>
       </select>
 
       <label style={S.label}>Birthdate</label>
@@ -186,7 +196,7 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = useState([]);
   const [loadErr, setLoadErr] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
+  const [addInitial, setAddInitial] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -202,13 +212,20 @@ export default function EmployeesPage() {
 
   useEffect(() => { load(); }, []);
 
+  const openAddModal = async () => {
+    setSaveErr("");
+    const { empno, error } = await getNextEmpno();
+    if (error) { setSaveErr(error.message); return; }
+    setAddInitial({ empno });
+  };
+
   const handleAdd = async (form) => {
     setSaving(true);
     setSaveErr("");
     const { error } = await addEmployee(form, currentUser.id);
     setSaving(false);
     if (error) { setSaveErr(error.message); return; }
-    setShowAdd(false);
+    setAddInitial(null);
     load();
   };
 
@@ -236,7 +253,7 @@ export default function EmployeesPage() {
       <div style={S.header}>
         <h1 style={S.h1}>Employees</h1>
         {rights.EMP_ADD && (
-          <button style={S.btnPrimary} onClick={() => { setShowAdd(true); setSaveErr(""); }}>
+          <button style={S.btnPrimary} onClick={openAddModal}>
             + Add Employee
           </button>
         )}
@@ -278,7 +295,7 @@ export default function EmployeesPage() {
                   View
                 </button>
                 {rights.EMP_EDIT && emp.record_status === "ACTIVE" && (
-                  <button style={S.btnSmEdit} onClick={() => { setEditTarget(emp); setSaveErr(""); }}>
+                  <button style={S.btnSmEdit} onClick={() => { setEditTarget({ ...emp, _isEdit: true }); setSaveErr(""); }}>
                     Edit
                   </button>
                 )}
@@ -309,9 +326,9 @@ export default function EmployeesPage() {
       </div>
 
       {/* Add modal */}
-      {showAdd && (
-        <Modal title="Add Employee" onClose={() => setShowAdd(false)}>
-          <EmployeeForm onSave={handleAdd} onCancel={() => setShowAdd(false)} saving={saving} />
+      {addInitial && (
+        <Modal title="Add Employee" onClose={() => setAddInitial(null)}>
+          <EmployeeForm initial={addInitial} onSave={handleAdd} onCancel={() => setAddInitial(null)} saving={saving} />
           {saveErr && <div style={S.error}>{saveErr}</div>}
         </Modal>
       )}
