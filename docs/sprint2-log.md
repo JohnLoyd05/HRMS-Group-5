@@ -29,7 +29,7 @@ Implement and verify role-based access control (rights matrix), soft-delete casc
 
 ---
 
-### M2 — Database Administrator / Backend Lead
+### M2 — Frontend Developer (UI/UX)
 
 **Tasks Completed:**
 - Designed and implemented `UserModule_Rights` table with 17 right codes per user
@@ -47,7 +47,7 @@ Implement and verify role-based access control (rights matrix), soft-delete casc
 
 ---
 
-### M3 — Frontend Lead
+### M3 — Backend / Database Engineer
 
 **Tasks Completed:**
 - Implemented `UserRightsContext.jsx`: loads all 17 rights for the logged-in user on login; exposes `useRights()` hook
@@ -65,7 +65,7 @@ Implement and verify role-based access control (rights matrix), soft-delete casc
 
 ---
 
-### M4 — UI/UX Designer / Frontend Support
+### M4 — Rights & Authentication Specialist
 
 **Tasks Completed:**
 - Updated `AppShell.jsx` to hide "Deleted Items" sidebar link for USER accounts
