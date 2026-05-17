@@ -26,7 +26,7 @@ export default function AppShell() {
     { id: "departments",  label: "Departments",  icon: "🏢" },
     { id: "reports",      label: "Reports",      icon: "📊" },
     ...(userType !== "USER" ? [{ id: "deleted-items", label: "Deleted Items", icon: "🗑️" }] : []),
-    ...(userType === "ADMIN" || userType === "SUPERADMIN" ? [{ id: "admin", label: "Admin", icon: "⚙️" }] : []),
+    ...(rights.ADM_USER ? [{ id: "admin", label: "Admin", icon: "⚙️" }] : []),
   ];
 
   const handleNav = (id) => {
