@@ -15,8 +15,9 @@ export default function AppShell() {
   const userType = currentUser?.user_type;
   const page = location.pathname.slice(1) || "employees";
 
-  const handleLogout = () => {
-    supabase.auth.signOut();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
   };
 
   const NAV = [

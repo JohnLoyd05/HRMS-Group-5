@@ -6,8 +6,12 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Exchange the OAuth code for a session, then let AuthContext's
-    // onAuthStateChange login guard decide whether to allow or block.
+    // Session may already exist if Supabase processed the OAuth token
+    // from the URL hash before this component mounted — check immediately.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/employees", { replace: true });
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
         navigate("/employees", { replace: true });
