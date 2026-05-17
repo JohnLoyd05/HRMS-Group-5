@@ -8,8 +8,8 @@ function makeStamp(action, userId) {
 export async function getJobs(userType) {
   let query = supabase
     .from('job')
-    .select('jobCode, jobDesc, record_status, stamp')
-    .order('jobCode');
+    .select('jobcode, jobdesc, record_status, stamp')
+    .order('jobcode');
   if (userType === 'USER') query = query.eq('record_status', 'ACTIVE');
   const { data, error } = await query;
   return { data, error };
@@ -30,7 +30,7 @@ export async function updateJob(jobCode, updates, userId) {
   const { data, error } = await supabase
     .from('job')
     .update({ ...updates, stamp })
-    .eq('jobCode', jobCode);
+    .eq('jobcode', jobCode);
   return { data, error };
 }
 
@@ -40,7 +40,7 @@ export async function softDeleteJob(jobCode, userId) {
   const { error } = await supabase
     .from('job')
     .update({ record_status: 'INACTIVE', stamp })
-    .eq('jobCode', jobCode);
+    .eq('jobcode', jobCode);
   return { error };
 }
 
@@ -50,6 +50,6 @@ export async function recoverJob(jobCode, userId) {
   const { error } = await supabase
     .from('job')
     .update({ record_status: 'ACTIVE', stamp })
-    .eq('jobCode', jobCode);
+    .eq('jobcode', jobCode);
   return { error };
 }

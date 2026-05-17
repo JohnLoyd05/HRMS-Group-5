@@ -1,4 +1,3 @@
-// Fixed for pr 1 M4
 import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -16,13 +15,12 @@ export default function AppShell() {
   const userType = currentUser?.user_type;
   const page = location.pathname.slice(1) || "employees";
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    supabase.auth.signOut();
   };
 
   const NAV = [
     { id: "employees",    label: "Employees",    icon: "👤" },
-    { id: "jobhistory",   label: "Job History",  icon: "📋" },
     { id: "jobs",         label: "Jobs",         icon: "💼" },
     { id: "departments",  label: "Departments",  icon: "🏢" },
     { id: "reports",      label: "Reports",      icon: "📊" },

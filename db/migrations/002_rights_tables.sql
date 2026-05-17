@@ -9,7 +9,7 @@ CREATE TABLE "user" (
   username      VARCHAR(50),
   user_type     VARCHAR(15)  NOT NULL DEFAULT 'USER',
   record_status VARCHAR(10)  NOT NULL DEFAULT 'INACTIVE',
-  stamp         VARCHAR(60)
+  stamp         VARCHAR(100)
 );
 
 CREATE TABLE "Module" (

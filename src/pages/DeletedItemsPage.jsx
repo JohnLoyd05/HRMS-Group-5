@@ -131,9 +131,9 @@ function DeletedJobHistory({ userId }) {
   useEffect(() => { load(); }, []);
 
   const handleRecover = async (row) => {
-    const key = `${row.empNo}-${row.jobCode}-${row.effDate}`;
+    const key = `${row.empno}-${row.jobcode}-${row.effdate}`;
     setRecovering(key);
-    const { error } = await recoverJobHistory(row.empNo, row.jobCode, row.effDate, userId);
+    const { error } = await recoverJobHistory(row.empno, row.jobcode, row.effdate, userId);
     setRecovering(null);
     if (error) { setErr(error.message); return; }
     load();
@@ -156,13 +156,13 @@ function DeletedJobHistory({ userId }) {
         </thead>
         <tbody>
           {rows.map((r) => {
-            const key = `${r.empNo}-${r.jobCode}-${r.effDate}`;
+            const key = `${r.empno}-${r.jobcode}-${r.effdate}`;
             return (
               <tr key={key}>
-                <Td>{r.empNo}</Td>
-                <Td>{r.jobCode}</Td>
-                <Td>{r.effDate}</Td>
-                <Td>{r.deptCode}</Td>
+                <Td>{r.empno}</Td>
+                <Td>{r.jobcode}</Td>
+                <Td>{r.effdate}</Td>
+                <Td>{r.deptcode}</Td>
                 <Td>{r.salary}</Td>
                 <td style={{ ...S.td, fontSize: 11, color: "#888" }}>{r.stamp}</td>
                 <Td>
@@ -206,9 +206,9 @@ function DeletedJobs({ userId }) {
 
   useEffect(() => { load(); }, []);
 
-  const handleRecover = async (jobCode) => {
-    setRecovering(jobCode);
-    const { error } = await recoverJob(jobCode, userId);
+  const handleRecover = async (jobcode) => {
+    setRecovering(jobcode);
+    const { error } = await recoverJob(jobcode, userId);
     setRecovering(null);
     if (error) { setErr(error.message); return; }
     load();
@@ -228,17 +228,17 @@ function DeletedJobs({ userId }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.jobCode}>
-              <Td>{r.jobCode}</Td>
-              <Td>{r.jobDesc}</Td>
+            <tr key={r.jobcode}>
+              <Td>{r.jobcode}</Td>
+              <Td>{r.jobdesc}</Td>
               <td style={{ ...S.td, fontSize: 11, color: "#888" }}>{r.stamp}</td>
               <Td>
                 <button
                   style={S.btnRecover}
-                  disabled={recovering === r.jobCode}
-                  onClick={() => handleRecover(r.jobCode)}
+                  disabled={recovering === r.jobcode}
+                  onClick={() => handleRecover(r.jobcode)}
                 >
-                  {recovering === r.jobCode ? "Recovering…" : "Recover"}
+                  {recovering === r.jobcode ? "Recovering…" : "Recover"}
                 </button>
               </Td>
             </tr>
@@ -272,9 +272,9 @@ function DeletedDepts({ userId }) {
 
   useEffect(() => { load(); }, []);
 
-  const handleRecover = async (deptCode) => {
-    setRecovering(deptCode);
-    const { error } = await recoverDept(deptCode, userId);
+  const handleRecover = async (deptcode) => {
+    setRecovering(deptcode);
+    const { error } = await recoverDept(deptcode, userId);
     setRecovering(null);
     if (error) { setErr(error.message); return; }
     load();
@@ -294,17 +294,17 @@ function DeletedDepts({ userId }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.deptCode}>
-              <Td>{r.deptCode}</Td>
-              <Td>{r.deptName}</Td>
+            <tr key={r.deptcode}>
+              <Td>{r.deptcode}</Td>
+              <Td>{r.deptname}</Td>
               <td style={{ ...S.td, fontSize: 11, color: "#888" }}>{r.stamp}</td>
               <Td>
                 <button
                   style={S.btnRecover}
-                  disabled={recovering === r.deptCode}
-                  onClick={() => handleRecover(r.deptCode)}
+                  disabled={recovering === r.deptcode}
+                  onClick={() => handleRecover(r.deptcode)}
                 >
-                  {recovering === r.deptCode ? "Recovering…" : "Recover"}
+                  {recovering === r.deptcode ? "Recovering…" : "Recover"}
                 </button>
               </Td>
             </tr>

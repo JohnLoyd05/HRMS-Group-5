@@ -21,9 +21,9 @@ export async function getSalarySummaryByJob() {
 // Full job history for one employee
 export async function getEmployeeFullHistory(empNo) {
   const { data, error } = await supabase
-    .from('jobHistory')
-    .select('empNo, jobCode, effDate, salary, deptCode, record_status, stamp')
-    .eq('empNo', empNo)
-    .order('effDate', { ascending: true })
+    .from('jobhistory')
+    .select('empno, jobcode, effdate, salary, deptcode, record_status, stamp')
+    .eq('empno', empNo)
+    .order('effdate', { ascending: true })
   return { data, error }
 }

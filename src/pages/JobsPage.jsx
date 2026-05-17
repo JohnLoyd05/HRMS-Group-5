@@ -77,15 +77,15 @@ function Modal({ title, children }) {
 
 function JobForm({ initial = {}, onSave, onCancel, saving }) {
   const [form, setForm] = useState({
-    jobCode: initial.jobCode ?? "",
-    jobDesc: initial.jobDesc ?? "",
+    jobcode: initial.jobcode ?? "",
+    jobdesc: initial.jobdesc ?? "",
   });
   const [err, setErr] = useState("");
   const set = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
-  const isEdit = !!initial.jobCode;
+  const isEdit = !!initial.jobcode;
 
   const handleSubmit = () => {
-    if (!form.jobCode.trim() || !form.jobDesc.trim()) {
+    if (!form.jobcode.trim() || !form.jobdesc.trim()) {
       setErr("Job code and description are required.");
       return;
     }
@@ -98,13 +98,13 @@ function JobForm({ initial = {}, onSave, onCancel, saving }) {
       <label style={S.label}>Job Code *</label>
       <input
         style={{ ...S.input, background: isEdit ? "#f5f4f0" : "#fff", color: isEdit ? "#888" : "#1a1a18" }}
-        value={form.jobCode}
-        onChange={set("jobCode")}
+        value={form.jobcode}
+        onChange={set("jobcode")}
         readOnly={isEdit}
       />
 
       <label style={S.label}>Job Description *</label>
-      <input style={S.input} value={form.jobDesc} onChange={set("jobDesc")} />
+      <input style={S.input} value={form.jobdesc} onChange={set("jobdesc")} />
 
       {err && <div style={S.error}>{err}</div>}
 
@@ -122,7 +122,7 @@ function DeactivateConfirm({ job, onConfirm, onCancel, saving }) {
   return (
     <Modal title="Deactivate Job">
       <p style={{ fontSize: 14, margin: "0 0 8px" }}>
-        Deactivate <strong>{job.jobCode} — {job.jobDesc}</strong>?
+        Deactivate <strong>{job.jobcode} — {job.jobdesc}</strong>?
       </p>
       <p style={{ fontSize: 13, color: "#666", margin: 0 }}>
         It will no longer appear for regular users. Recoverable from Deleted Items.
@@ -173,7 +173,7 @@ export default function JobsPage() {
 
   const handleEdit = async (form) => {
     setSaving(true); setSaveErr("");
-    const { error } = await updateJob(editTarget.jobCode, { jobDesc: form.jobDesc }, currentUser.id);
+    const { error } = await updateJob(editTarget.jobcode, { jobdesc: form.jobdesc }, currentUser.id);
     setSaving(false);
     if (error) { setSaveErr(error.message); return; }
     setEditTarget(null);
@@ -182,7 +182,7 @@ export default function JobsPage() {
 
   const handleDelete = async () => {
     setSaving(true);
-    const { error } = await softDeleteJob(deleteTarget.jobCode, currentUser.id);
+    const { error } = await softDeleteJob(deleteTarget.jobcode, currentUser.id);
     setSaving(false);
     if (error) { setSaveErr(error.message); return; }
     setDeleteTarget(null);
@@ -217,9 +217,9 @@ export default function JobsPage() {
         </thead>
         <tbody>
           {jobs.map((job) => (
-            <tr key={job.jobCode}>
-              <Td>{job.jobCode}</Td>
-              <Td>{job.jobDesc}</Td>
+            <tr key={job.jobcode}>
+              <Td>{job.jobcode}</Td>
+              <Td>{job.jobdesc}</Td>
               <Td>
                 <span style={S.badge(job.record_status)}>{job.record_status}</span>
               </Td>

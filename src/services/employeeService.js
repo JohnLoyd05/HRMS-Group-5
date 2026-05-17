@@ -11,7 +11,7 @@ function makeStamp(action, userId) {
 export async function getEmployees(userType) {
   let query = supabase
     .from('employee')
-    .select('empno, lastname, firstname, gender, birthdate, hiredate, sepDate, record_status, stamp')
+    .select('empno, lastname, firstname, gender, birthdate, hiredate, sepdate, record_status, stamp')
     .order('empno');
   if (userType === 'USER') query = query.eq('record_status', 'ACTIVE');
   const { data, error } = await query;

@@ -35,3 +35,6 @@ WHERE jh.record_status = 'ACTIVE'
   AND j.record_status = 'ACTIVE'
 GROUP BY j.jobcode, j.jobdesc
 ORDER BY avgsalary DESC;
+
+GRANT SELECT ON public.headcount_by_dept TO authenticated;
+GRANT SELECT ON public.salary_summary_by_job TO authenticated;

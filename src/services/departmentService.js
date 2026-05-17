@@ -8,8 +8,8 @@ function makeStamp(action, userId) {
 export async function getDepts(userType) {
   let query = supabase
     .from('department')
-    .select('deptCode, deptName, record_status, stamp')
-    .order('deptCode');
+    .select('deptcode, deptname, record_status, stamp')
+    .order('deptcode');
   if (userType === 'USER') query = query.eq('record_status', 'ACTIVE');
   const { data, error } = await query;
   return { data, error };
@@ -30,7 +30,7 @@ export async function updateDept(deptCode, updates, userId) {
   const { data, error } = await supabase
     .from('department')
     .update({ ...updates, stamp })
-    .eq('deptCode', deptCode);
+    .eq('deptcode', deptCode);
   return { data, error };
 }
 
@@ -40,7 +40,7 @@ export async function softDeleteDept(deptCode, userId) {
   const { error } = await supabase
     .from('department')
     .update({ record_status: 'INACTIVE', stamp })
-    .eq('deptCode', deptCode);
+    .eq('deptcode', deptCode);
   return { error };
 }
 
@@ -50,6 +50,6 @@ export async function recoverDept(deptCode, userId) {
   const { error } = await supabase
     .from('department')
     .update({ record_status: 'ACTIVE', stamp })
-    .eq('deptCode', deptCode);
+    .eq('deptcode', deptCode);
   return { error };
 }

@@ -104,7 +104,7 @@ function EmployeeForm({ initial = {}, onSave, onCancel, saving }) {
     gender: initial.gender ?? "",
     birthdate: initial.birthdate ?? "",
     hiredate: initial.hiredate ?? "",
-    sepDate: initial.sepDate ?? "",
+    sepdate: initial.sepdate ?? "",
   });
   const [err, setErr] = useState("");
 
@@ -141,7 +141,7 @@ function EmployeeForm({ initial = {}, onSave, onCancel, saving }) {
       <input style={S.input} type="date" value={form.hiredate} onChange={set("hiredate")} />
 
       <label style={S.label}>Separation Date</label>
-      <input style={S.input} type="date" value={form.sepDate} onChange={set("sepDate")} />
+      <input style={S.input} type="date" value={form.sepdate} onChange={set("sepdate")} />
 
       {err && <div style={S.error}>{err}</div>}
 

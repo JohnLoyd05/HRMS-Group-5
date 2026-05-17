@@ -7,10 +7,10 @@ function makeStamp(action, userId) {
 // GET — USER sees ACTIVE rows only; ADMIN/SUPERADMIN see all
 export async function getJobHistory(empNo, userType) {
   let query = supabase
-    .from('jobHistory')
-    .select('empNo, jobCode, effDate, salary, deptCode, record_status, stamp')
-    .eq('empNo', empNo)
-    .order('effDate', { ascending: false });
+    .from('jobhistory')
+    .select('empno, jobcode, effdate, salary, deptcode, record_status, stamp')
+    .eq('empno', empNo)
+    .order('effdate', { ascending: false });
   if (userType === 'USER') query = query.eq('record_status', 'ACTIVE');
   const { data, error } = await query;
   return { data, error };
@@ -20,7 +20,7 @@ export async function getJobHistory(empNo, userType) {
 export async function addJobHistory(rowData, userId) {
   const stamp = makeStamp('CREATED', userId);
   const { data, error } = await supabase
-    .from('jobHistory')
+    .from('jobhistory')
     .insert([{ ...rowData, record_status: 'ACTIVE', stamp }]);
   return { data, error };
 }
@@ -29,11 +29,11 @@ export async function addJobHistory(rowData, userId) {
 export async function updateJobHistory(empNo, jobCode, effDate, updates, userId) {
   const stamp = makeStamp('UPDATED', userId);
   const { data, error } = await supabase
-    .from('jobHistory')
+    .from('jobhistory')
     .update({ ...updates, stamp })
-    .eq('empNo', empNo)
-    .eq('jobCode', jobCode)
-    .eq('effDate', effDate);
+    .eq('empno', empNo)
+    .eq('jobcode', jobCode)
+    .eq('effdate', effDate);
   return { data, error };
 }
 
@@ -41,11 +41,11 @@ export async function updateJobHistory(empNo, jobCode, effDate, updates, userId)
 export async function softDeleteJobHistory(empNo, jobCode, effDate, userId) {
   const stamp = makeStamp('DEACTIVATED', userId);
   const { error } = await supabase
-    .from('jobHistory')
+    .from('jobhistory')
     .update({ record_status: 'INACTIVE', stamp })
-    .eq('empNo', empNo)
-    .eq('jobCode', jobCode)
-    .eq('effDate', effDate);
+    .eq('empno', empNo)
+    .eq('jobcode', jobCode)
+    .eq('effdate', effDate);
   return { error };
 }
 
@@ -53,10 +53,10 @@ export async function softDeleteJobHistory(empNo, jobCode, effDate, userId) {
 export async function recoverJobHistory(empNo, jobCode, effDate, userId) {
   const stamp = makeStamp('REACTIVATED', userId);
   const { error } = await supabase
-    .from('jobHistory')
+    .from('jobhistory')
     .update({ record_status: 'ACTIVE', stamp })
-    .eq('empNo', empNo)
-    .eq('jobCode', jobCode)
-    .eq('effDate', effDate);
+    .eq('empno', empNo)
+    .eq('jobcode', jobCode)
+    .eq('effdate', effDate);
   return { error };
 }

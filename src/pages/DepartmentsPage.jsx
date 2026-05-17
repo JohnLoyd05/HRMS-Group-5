@@ -77,15 +77,15 @@ function Modal({ title, children }) {
 
 function DeptForm({ initial = {}, onSave, onCancel, saving }) {
   const [form, setForm] = useState({
-    deptCode: initial.deptCode ?? "",
-    deptName: initial.deptName ?? "",
+    deptcode: initial.deptcode ?? "",
+    deptname: initial.deptname ?? "",
   });
   const [err, setErr] = useState("");
   const set = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
-  const isEdit = !!initial.deptCode;
+  const isEdit = !!initial.deptcode;
 
   const handleSubmit = () => {
-    if (!form.deptCode.trim() || !form.deptName.trim()) {
+    if (!form.deptcode.trim() || !form.deptname.trim()) {
       setErr("Department code and name are required.");
       return;
     }
@@ -98,13 +98,13 @@ function DeptForm({ initial = {}, onSave, onCancel, saving }) {
       <label style={S.label}>Department Code *</label>
       <input
         style={{ ...S.input, background: isEdit ? "#f5f4f0" : "#fff", color: isEdit ? "#888" : "#1a1a18" }}
-        value={form.deptCode}
-        onChange={set("deptCode")}
+        value={form.deptcode}
+        onChange={set("deptcode")}
         readOnly={isEdit}
       />
 
       <label style={S.label}>Department Name *</label>
-      <input style={S.input} value={form.deptName} onChange={set("deptName")} />
+      <input style={S.input} value={form.deptname} onChange={set("deptname")} />
 
       {err && <div style={S.error}>{err}</div>}
 
@@ -122,7 +122,7 @@ function DeactivateConfirm({ dept, onConfirm, onCancel, saving }) {
   return (
     <Modal title="Deactivate Department">
       <p style={{ fontSize: 14, margin: "0 0 8px" }}>
-        Deactivate <strong>{dept.deptCode} — {dept.deptName}</strong>?
+        Deactivate <strong>{dept.deptcode} — {dept.deptname}</strong>?
       </p>
       <p style={{ fontSize: 13, color: "#666", margin: 0 }}>
         It will no longer appear for regular users. Recoverable from Deleted Items.
@@ -173,7 +173,7 @@ export default function DepartmentsPage() {
 
   const handleEdit = async (form) => {
     setSaving(true); setSaveErr("");
-    const { error } = await updateDept(editTarget.deptCode, { deptName: form.deptName }, currentUser.id);
+    const { error } = await updateDept(editTarget.deptcode, { deptname: form.deptname }, currentUser.id);
     setSaving(false);
     if (error) { setSaveErr(error.message); return; }
     setEditTarget(null);
@@ -182,7 +182,7 @@ export default function DepartmentsPage() {
 
   const handleDelete = async () => {
     setSaving(true);
-    const { error } = await softDeleteDept(deleteTarget.deptCode, currentUser.id);
+    const { error } = await softDeleteDept(deleteTarget.deptcode, currentUser.id);
     setSaving(false);
     if (error) { setSaveErr(error.message); return; }
     setDeleteTarget(null);
@@ -217,9 +217,9 @@ export default function DepartmentsPage() {
         </thead>
         <tbody>
           {depts.map((dept) => (
-            <tr key={dept.deptCode}>
-              <Td>{dept.deptCode}</Td>
-              <Td>{dept.deptName}</Td>
+            <tr key={dept.deptcode}>
+              <Td>{dept.deptcode}</Td>
+              <Td>{dept.deptname}</Td>
               <Td>
                 <span style={S.badge(dept.record_status)}>{dept.record_status}</span>
               </Td>

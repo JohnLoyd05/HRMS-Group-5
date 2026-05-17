@@ -21,12 +21,11 @@ export function AuthProvider({ children }) {
 
         if (error) {
           console.error('AuthContext getSession user query error:', error.message)
-        }
-
-        if (userRow?.record_status === 'ACTIVE') {
+          // Query failed — do not sign out, session still valid
+        } else if (userRow?.record_status === 'ACTIVE') {
           setSession(session)
           setCurrentUser({ ...session.user, ...userRow })
-        } else {
+        } else if (userRow?.record_status === 'INACTIVE') {
           await supabase.auth.signOut()
           navigate('/inactive')
         }
@@ -37,16 +36,23 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          const { data: userRow } = await supabase
+          const { data: userRow, error } = await supabase
             .from('user')
             .select('record_status, user_type, username')
             .eq('id', session.user.id)
             .single()
 
+          if (error) {
+            // Query failed (network/RLS issue) — do not sign out, keep current state
+            console.error('onAuthStateChange user query error:', error.message)
+            return
+          }
+
           if (userRow?.record_status === 'ACTIVE') {
             setSession(session)
             setCurrentUser({ ...session.user, ...userRow })
-          } else {
+          } else if (userRow?.record_status === 'INACTIVE') {
+            // Confirmed inactive account — sign out
             await supabase.auth.signOut()
             setCurrentUser(null)
             setSession(null)

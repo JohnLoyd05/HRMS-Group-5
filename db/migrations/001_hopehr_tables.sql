@@ -18,7 +18,7 @@ CREATE TABLE employee (
   hiredate      DATE,
   sepdate       DATE,
   record_status VARCHAR(10)   NOT NULL DEFAULT 'ACTIVE',
-  stamp         VARCHAR(60)
+  stamp         VARCHAR(100)
 );
 
 INSERT INTO employee (empno, lastname, firstname, gender, birthdate, hiredate, sepdate) VALUES
@@ -60,7 +60,7 @@ CREATE TABLE department (
   deptcode      VARCHAR(3)    NOT NULL PRIMARY KEY,
   deptname      VARCHAR(20),
   record_status VARCHAR(10)   NOT NULL DEFAULT 'ACTIVE',
-  stamp         VARCHAR(60)
+  stamp         VARCHAR(100)
 );
 
 INSERT INTO department (deptcode, deptname) VALUES
@@ -78,7 +78,7 @@ CREATE TABLE job (
   jobcode       VARCHAR(4)    NOT NULL PRIMARY KEY,
   jobdesc       VARCHAR(20),
   record_status VARCHAR(10)   NOT NULL DEFAULT 'ACTIVE',
-  stamp         VARCHAR(60)
+  stamp         VARCHAR(100)
 );
 
 INSERT INTO job (jobcode, jobdesc) VALUES
@@ -105,7 +105,7 @@ CREATE TABLE jobhistory (
   salary        DECIMAL(10,2) CONSTRAINT salary_ck CHECK (salary >= 0),
   deptcode      VARCHAR(4)    REFERENCES department(deptcode),
   record_status VARCHAR(10)   NOT NULL DEFAULT 'ACTIVE',
-  stamp         VARCHAR(60),
+  stamp         VARCHAR(100),
   PRIMARY KEY (empno, jobcode, effdate)
 );
 

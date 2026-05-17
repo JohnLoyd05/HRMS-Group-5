@@ -123,17 +123,17 @@ function ProfileField({ label, value }) {
 
 // --- Add Job History Form ---
 function AddJobHistoryForm({ empNo, jobs, depts, onSave, onCancel, saving }) {
-  const [form, setForm] = useState({ jobCode: "", effDate: "", salary: "", deptCode: "" });
+  const [form, setForm] = useState({ jobcode: "", effdate: "", salary: "", deptcode: "" });
   const [err, setErr] = useState("");
   const set = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
 
   const handleSubmit = () => {
-    if (!form.jobCode || !form.effDate || !form.salary || !form.deptCode) {
+    if (!form.jobcode || !form.effdate || !form.salary || !form.deptcode) {
       setErr("All fields are required.");
       return;
     }
     setErr("");
-    onSave({ empNo, ...form, salary: Number(form.salary) });
+    onSave({ empno: empNo, ...form, salary: Number(form.salary) });
   };
 
   const activeJobs = jobs.filter((j) => j.record_status === "ACTIVE");
@@ -142,23 +142,23 @@ function AddJobHistoryForm({ empNo, jobs, depts, onSave, onCancel, saving }) {
   return (
     <>
       <label style={S.label}>Job *</label>
-      <select style={S.select} value={form.jobCode} onChange={set("jobCode")}>
+      <select style={S.select} value={form.jobcode} onChange={set("jobcode")}>
         <option value="">— select job —</option>
         {activeJobs.map((j) => (
-          <option key={j.jobCode} value={j.jobCode}>{j.jobCode} — {j.jobDesc}</option>
+          <option key={j.jobcode} value={j.jobcode}>{j.jobcode} — {j.jobdesc}</option>
         ))}
       </select>
 
       <label style={S.label}>Department *</label>
-      <select style={S.select} value={form.deptCode} onChange={set("deptCode")}>
+      <select style={S.select} value={form.deptcode} onChange={set("deptcode")}>
         <option value="">— select department —</option>
         {activeDepts.map((d) => (
-          <option key={d.deptCode} value={d.deptCode}>{d.deptCode} — {d.deptName}</option>
+          <option key={d.deptcode} value={d.deptcode}>{d.deptcode} — {d.deptname}</option>
         ))}
       </select>
 
       <label style={S.label}>Effective Date *</label>
-      <input style={S.input} type="date" value={form.effDate} onChange={set("effDate")} />
+      <input style={S.input} type="date" value={form.effdate} onChange={set("effdate")} />
 
       <label style={S.label}>Salary *</label>
       <input style={S.input} type="number" min="0" placeholder="0.00" value={form.salary} onChange={set("salary")} />
@@ -178,9 +178,9 @@ function AddJobHistoryForm({ empNo, jobs, depts, onSave, onCancel, saving }) {
 // --- Edit Job History Modal ---
 function EditJobHistoryModal({ row, jobs, depts, onSave, onCancel, saving }) {
   const [form, setForm] = useState({
-    jobCode: row.jobCode,
-    deptCode: row.deptCode,
-    effDate: row.effDate,
+    jobcode: row.jobcode,
+    deptcode: row.deptcode,
+    effdate: row.effdate,
     salary: row.salary,
   });
   const [err, setErr] = useState("");
@@ -189,9 +189,9 @@ function EditJobHistoryModal({ row, jobs, depts, onSave, onCancel, saving }) {
   const handleSubmit = () => {
     if (!form.salary) { setErr("Salary is required."); return; }
     setErr("");
-    onSave(row.empNo, row.jobCode, row.effDate, {
-      jobCode: form.jobCode,
-      deptCode: form.deptCode,
+    onSave(row.empno, row.jobcode, row.effdate, {
+      jobcode: form.jobcode,
+      deptcode: form.deptcode,
       salary: Number(form.salary),
     });
   };
@@ -202,21 +202,21 @@ function EditJobHistoryModal({ row, jobs, depts, onSave, onCancel, saving }) {
   return (
     <Modal title="Edit Job History" onClose={onCancel}>
       <label style={S.label}>Job</label>
-      <select style={S.select} value={form.jobCode} onChange={set("jobCode")}>
+      <select style={S.select} value={form.jobcode} onChange={set("jobcode")}>
         {activeJobs.map((j) => (
-          <option key={j.jobCode} value={j.jobCode}>{j.jobCode} — {j.jobDesc}</option>
+          <option key={j.jobcode} value={j.jobcode}>{j.jobcode} — {j.jobdesc}</option>
         ))}
       </select>
 
       <label style={S.label}>Department</label>
-      <select style={S.select} value={form.deptCode} onChange={set("deptCode")}>
+      <select style={S.select} value={form.deptcode} onChange={set("deptcode")}>
         {activeDepts.map((d) => (
-          <option key={d.deptCode} value={d.deptCode}>{d.deptCode} — {d.deptName}</option>
+          <option key={d.deptcode} value={d.deptcode}>{d.deptcode} — {d.deptname}</option>
         ))}
       </select>
 
       <label style={S.label}>Effective Date (read-only)</label>
-      <input style={{ ...S.input, background: "#f5f4f0", color: "#888" }} value={form.effDate} readOnly />
+      <input style={{ ...S.input, background: "#f5f4f0", color: "#888" }} value={form.effdate} readOnly />
 
       <label style={S.label}>Salary</label>
       <input style={S.input} type="number" min="0" value={form.salary} onChange={set("salary")} />
@@ -238,8 +238,8 @@ function JHDeleteConfirm({ row, jobMap, onConfirm, onCancel, saving }) {
   return (
     <Modal title="Deactivate Job History" onClose={onCancel}>
       <p style={{ fontSize: 14, margin: "0 0 8px" }}>
-        Deactivate <strong>{jobMap[row.jobCode] ?? row.jobCode}</strong> effective{" "}
-        <strong>{formatDate(row.effDate)}</strong>?
+        Deactivate <strong>{jobMap[row.jobcode] ?? row.jobcode}</strong> effective{" "}
+        <strong>{formatDate(row.effdate)}</strong>?
       </p>
       <p style={{ fontSize: 13, color: "#666", margin: 0 }}>
         This can be recovered later from Deleted Items.
@@ -296,11 +296,11 @@ export default function EmployeeDetailPage() {
     setDepts(deptRes.data ?? []);
 
     const jMap = {};
-    (jobRes.data ?? []).forEach((j) => { jMap[j.jobCode] = j.jobDesc; });
+    (jobRes.data ?? []).forEach((j) => { jMap[j.jobcode] = j.jobdesc; });
     setJobMap(jMap);
 
     const dMap = {};
-    (deptRes.data ?? []).forEach((d) => { dMap[d.deptCode] = d.deptName; });
+    (deptRes.data ?? []).forEach((d) => { dMap[d.deptcode] = d.deptname; });
     setDeptMap(dMap);
   };
 
@@ -329,7 +329,7 @@ export default function EmployeeDetailPage() {
   const handleDelete = async () => {
     setSaving(true);
     const { error } = await softDeleteJobHistory(
-      deleteRow.empNo, deleteRow.jobCode, deleteRow.effDate, currentUser.id
+      deleteRow.empno, deleteRow.jobcode, deleteRow.effdate, currentUser.id
     );
     setSaving(false);
     if (error) { setSaveErr(error.message); return; }
@@ -372,7 +372,7 @@ export default function EmployeeDetailPage() {
           <ProfileField label="Gender" value={employee.gender} />
           <ProfileField label="Birthdate" value={formatDate(employee.birthdate)} />
           <ProfileField label="Hire Date" value={formatDate(employee.hiredate)} />
-          <ProfileField label="Separation Date" value={formatDate(employee.sepDate)} />
+          <ProfileField label="Separation Date" value={formatDate(employee.sepdate)} />
           {showStamp && (
             <ProfileField label="Stamp" value={employee.stamp} />
           )}
@@ -406,10 +406,10 @@ export default function EmployeeDetailPage() {
           </thead>
           <tbody>
             {jobHistory.map((row) => (
-              <tr key={`${row.empNo}-${row.jobCode}-${row.effDate}`}>
-                <Td>{formatDate(row.effDate)}</Td>
-                <Td>{jobMap[row.jobCode] ?? row.jobCode}</Td>
-                <Td>{deptMap[row.deptCode] ?? row.deptCode}</Td>
+              <tr key={`${row.empno}-${row.jobcode}-${row.effdate}`}>
+                <Td>{formatDate(row.effdate)}</Td>
+                <Td>{jobMap[row.jobcode] ?? row.jobcode}</Td>
+                <Td>{deptMap[row.deptcode] ?? row.deptcode}</Td>
                 <Td>{formatSalary(row.salary)}</Td>
                 <Td>
                   <span style={S.badge(row.record_status)}>{row.record_status}</span>
