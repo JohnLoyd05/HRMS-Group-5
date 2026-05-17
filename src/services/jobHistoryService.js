@@ -4,13 +4,14 @@ function makeStamp(action, userId) {
   return `${action} by ${userId} at ${new Date().toISOString()}`;
 }
 
-// GET — USER sees ACTIVE rows only; ADMIN/SUPERADMIN see all
+// GET — pass empNo to filter by employee, or null to get all rows
+//       USER sees ACTIVE rows only; ADMIN/SUPERADMIN see all
 export async function getJobHistory(empNo, userType) {
   let query = supabase
     .from('jobHistory')
     .select('empNo, jobCode, effDate, salary, deptCode, record_status, stamp')
-    .eq('empNo', empNo)
     .order('effDate', { ascending: false });
+  if (empNo) query = query.eq('empNo', empNo);
   if (userType === 'USER') query = query.eq('record_status', 'ACTIVE');
   const { data, error } = await query;
   return { data, error };
