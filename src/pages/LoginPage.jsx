@@ -1,19 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
-import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (currentUser) navigate("/", { replace: true });
-  }, [currentUser, navigate]);
 
   async function handleGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -36,11 +30,11 @@ export default function LoginPage() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f5f4f0", fontFamily: "'DM Sans','Segoe UI',sans-serif", padding: "20px" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:wght@400;500&display=swap');
-        .li{width:100%;padding:10px 14px;border:1px solid #d0cec8;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;background:#fff;transition:border .2s;}
+        .li{width:100%;padding:10px 14px;border:1px solid #d0cec8;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;background:#fff;transition:border .2s;font-family:'DM Sans',sans-serif;}
         .li:focus{border-color:#185FA5;}
-        .lb{width:100%;padding:11px;background:#1a1a18;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+        .lb{width:100%;padding:11px;background:#1a1a18;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;font-family:'DM Sans',sans-serif;}
         .lb:hover{opacity:.88;} .lb:disabled{opacity:.5;cursor:not-allowed;}
-        .lb-google{width:100%;padding:11px;background:#fff;color:#1a1a18;border:1px solid #d0cec8;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+        .lb-google{width:100%;padding:11px;background:#fff;color:#1a1a18;border:1px solid #d0cec8;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;font-family:'DM Sans',sans-serif;}
         .lb-google:hover{background:#f5f2ee;}
         .divider{display:flex;align-items:center;gap:10px;margin:4px 0;}
         .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e8e4dd;}
@@ -56,8 +50,12 @@ export default function LoginPage() {
         </div>
 
         <div style={{ display: "flex", background: "#f5f4f0", borderRadius: 10, padding: 4, marginBottom: 20 }}>
-          <button style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, background: "#fff", color: "#1a1a18", boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>Sign In</button>
-          <button onClick={() => navigate("/register")} style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, background: "transparent", color: "#888" }}>Register</button>
+          <button style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, background: "#fff", color: "#1a1a18", boxShadow: "0 1px 4px rgba(0,0,0,.08)", fontFamily: "'DM Sans',sans-serif" }}>
+            Sign In
+          </button>
+          <button onClick={() => navigate("/register")} style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, background: "transparent", color: "#888", fontFamily: "'DM Sans',sans-serif" }}>
+            Register
+          </button>
         </div>
 
         {error && <div style={{ background: "#FCEBEB", color: "#A32D2D", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 14 }}>{error}</div>}
