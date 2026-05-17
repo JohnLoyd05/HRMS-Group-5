@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 
@@ -9,6 +9,10 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  // Ref so the effect closure always calls the latest navigate without needing
+  // navigate as a dependency (which would tear down the subscription on re-renders).
+  const navigateRef = useRef(navigate)
+  useEffect(() => { navigateRef.current = navigate }, [navigate])
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -27,7 +31,7 @@ export function AuthProvider({ children }) {
           setCurrentUser({ ...session.user, ...userRow })
         } else if (userRow?.record_status === 'INACTIVE') {
           await supabase.auth.signOut()
-          navigate('/inactive')
+          navigateRef.current('/inactive')
         }
       }
       setLoading(false)
@@ -35,7 +39,10 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
+        if (
+          (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') &&
+          session?.user
+        ) {
           const { data: userRow, error } = await supabase
             .from('user')
             .select('record_status, user_type, username')
@@ -52,21 +59,21 @@ export function AuthProvider({ children }) {
             setSession(session)
             setCurrentUser({ ...session.user, ...userRow })
           } else if (userRow?.record_status === 'INACTIVE') {
-            // Confirmed inactive account — sign out
             await supabase.auth.signOut()
             setCurrentUser(null)
             setSession(null)
-            navigate('/inactive')
+            navigateRef.current('/inactive')
           }
         } else if (event === 'SIGNED_OUT') {
           setCurrentUser(null)
           setSession(null)
+          navigateRef.current('/login')
         }
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [navigate])
+  }, []) // empty — runs once; navigate is accessed via ref
 
   return (
     <AuthContext.Provider value={{ currentUser, session, loading }}>
