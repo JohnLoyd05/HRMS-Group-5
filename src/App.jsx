@@ -1,51 +1,46 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 import ProtectedRoute from './components/ProtectedRoute'
+import AppShell from './components/AppShell'
 
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 import EmployeesPage from './pages/EmployeesPage'
+import EmployeeDetailPage from './pages/EmployeeDetailPage'
 import JobHistoryPage from './pages/JobHistoryPage'
 import JobsPage from './pages/JobsPage'
 import DepartmentsPage from './pages/DepartmentsPage'
 import AdminPage from './pages/AdminPage'
 import DeletedItemsPage from './pages/DeletedItemsPage'
+import ReportsPage from './pages/ReportsPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
+import InactivePage from './pages/InactivePage'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <Routes>
 
-        {/* Public Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/inactive" element={<InactivePage />} />
 
-        {/* Protected Routes */}
-        <Route path="/employees" element={
-          <ProtectedRoute><EmployeesPage /></ProtectedRoute>
-        } />
-        <Route path="/jobhistory" element={
-          <ProtectedRoute><JobHistoryPage /></ProtectedRoute>
-        } />
-        <Route path="/jobs" element={
-          <ProtectedRoute><JobsPage /></ProtectedRoute>
-        } />
-        <Route path="/departments" element={
-          <ProtectedRoute><DepartmentsPage /></ProtectedRoute>
-        } />
-        <Route path="/admin" element={
-          <ProtectedRoute><AdminPage /></ProtectedRoute>
-        } />
-        <Route path="/deleted-items" element={
-          <ProtectedRoute><DeletedItemsPage /></ProtectedRoute>
-        } />
+      <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+        <Route path="/employees" element={<EmployeesPage />} />
+        <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
+        <Route path="/jobhistory" element={<JobHistoryPage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/departments" element={<DepartmentsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/deleted-items" element={<DeletedItemsPage />} />
+      </Route>
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
 
-      </Routes>
-    </BrowserRouter>
+    </Routes>
   )
 }
 
