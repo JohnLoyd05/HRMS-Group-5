@@ -53,7 +53,6 @@ export default function AppShell() {
         }
       `}</style>
 
-      {/* Overlay — closes sidebar when tapping outside */}
       <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
 
       {/* Hamburger button */}

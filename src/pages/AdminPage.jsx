@@ -1,4 +1,3 @@
-//PR 2 M4 update
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUsers, activateUser, deactivateUser } from "../services/adminService";

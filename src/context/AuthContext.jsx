@@ -9,11 +9,8 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  // Ref so the effect closure always calls the latest navigate without needing
-  // navigate as a dependency (which would tear down the subscription on re-renders).
   const navigateRef = useRef(navigate)
   useEffect(() => { navigateRef.current = navigate }, [navigate])
-  // Tracks when WE sign out an inactive user so SIGNED_OUT doesn't redirect to /login
   const inactiveSignOutRef = useRef(false)
 
   useEffect(() => {
@@ -30,7 +27,6 @@ export function AuthProvider({ children }) {
         } else if (userRow?.record_status === 'ACTIVE') {
           setSession(session)
           setCurrentUser({ ...session.user, ...userRow })
-          // Restore to current page on refresh — only redirect to /employees if on /login
           if (window.location.pathname === '/login' || window.location.pathname === '/') {
             navigateRef.current('/employees')
           }
@@ -46,7 +42,6 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
-          // Skip if we already have this user loaded (e.g. token refresh re-fires INITIAL_SESSION)
           if (event === 'INITIAL_SESSION' && currentUser?.id === session.user.id) return
 
           const { data: userRow, error } = await supabase
@@ -56,7 +51,6 @@ export function AuthProvider({ children }) {
             .single()
 
           if (error || !userRow) {
-            // No user row found — trigger didn't fire or user not provisioned yet
             console.error('onAuthStateChange: no user row found', error?.message)
             inactiveSignOutRef.current = true
             await supabase.auth.signOut()
@@ -83,7 +77,6 @@ export function AuthProvider({ children }) {
           setCurrentUser(null)
           setSession(null)
           if (inactiveSignOutRef.current) {
-            // We triggered this sign-out for an inactive user — stay on /inactive
             inactiveSignOutRef.current = false
           } else {
             navigateRef.current('/login')
@@ -93,7 +86,7 @@ export function AuthProvider({ children }) {
     )
 
     return () => subscription.unsubscribe()
-  }, []) // empty — runs once; navigate is accessed via ref
+  }, [])
 
   return (
     <AuthContext.Provider value={{ currentUser, session, loading }}>

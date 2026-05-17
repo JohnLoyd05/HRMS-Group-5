@@ -1,7 +1,4 @@
 export default function AuthCallbackPage() {
-  // AuthContext.onAuthStateChange handles all navigation after OAuth.
-  // This page just shows a spinner while the session is being established.
-
   return (
     <div style={{
       minHeight: "100vh",
