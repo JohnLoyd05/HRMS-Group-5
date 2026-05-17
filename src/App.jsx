@@ -1,55 +1,49 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
-import AppShell from './components/AppShell';
-import LoginPage from './pages/LoginPage';
-import AuthCallbackPage from './pages/AuthCallbackPage';
-import InactivePage from './pages/InactivePage';
-import EmployeesPage from './pages/EmployeesPage';
-import JobsPage from './pages/JobsPage';
-import DepartmentsPage from './pages/DepartmentsPage';
-import ReportsPage from './pages/ReportsPage';
-import DeletedItemsPage from './pages/DeletedItemsPage';
-import AdminPage from './pages/AdminPage';
-import EmployeeDetailPage from './pages/EmployeeDetailPage';
+import { Routes, Route, Navigate } from 'react-router-dom'
 
-export default function App() {
+import ProtectedRoute from './components/ProtectedRoute'
+import AppShell from './components/AppShell'
+
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import EmployeesPage from './pages/EmployeesPage'
+import EmployeeDetailPage from './pages/EmployeeDetailPage'
+import JobHistoryPage from './pages/JobHistoryPage'
+import JobsPage from './pages/JobsPage'
+import DepartmentsPage from './pages/DepartmentsPage'
+import AdminPage from './pages/AdminPage'
+import DeletedItemsPage from './pages/DeletedItemsPage'
+import ReportsPage from './pages/ReportsPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
+import InactivePage from './pages/InactivePage'
+
+function App() {
   return (
     <Routes>
-      {/* Public routes */}
+
+      {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/inactive" element={<InactivePage />} />
 
-      {/* Protected routes — all require login */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppShell />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="/employees" />} />
-        <Route path="employees" element={<EmployeesPage />} />
-        <Route path="employees/:empno" element={<EmployeeDetailPage />} />
-        <Route path="jobs" element={<JobsPage />} />
-        <Route path="departments" element={<DepartmentsPage />} />
-        <Route path="reports" element={<ReportsPage />} />
-        <Route path="admin" element={<AdminPage />} />
-
-        {/* ADMIN/SUPERADMIN only — USER gets redirected to /employees */}
-        <Route
-          path="deleted-items"
-          element={
-            <ProtectedRoute requireAdmin>
-              <DeletedItemsPage />
-            </ProtectedRoute>
-          }
-        />
+      {/* Protected Routes — all wrapped in AppShell layout */}
+      <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+        <Route path="/employees" element={<EmployeesPage />} />
+        <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
+        <Route path="/jobhistory" element={<JobHistoryPage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/departments" element={<DepartmentsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/deleted-items" element={<DeletedItemsPage />} />
       </Route>
 
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+
     </Routes>
-  );
+  )
 }
+
+export default App

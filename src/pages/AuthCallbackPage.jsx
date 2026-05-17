@@ -1,27 +1,6 @@
-import { useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
-
 export default function AuthCallbackPage() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Session may already exist if Supabase processed the OAuth token
-    // from the URL hash before this component mounted — check immediately.
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/employees", { replace: true });
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        navigate("/employees", { replace: true });
-      } else if (event === "SIGNED_OUT") {
-        navigate("/login", { replace: true });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  // AuthContext.onAuthStateChange handles all navigation after OAuth.
+  // This page just shows a spinner while the session is being established.
 
   return (
     <div style={{
