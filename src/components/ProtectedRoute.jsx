@@ -1,16 +1,19 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function ProtectedRoute({ children, requireAdmin = false }) {
+export default function ProtectedRoute({ children, requireAdmin = false, requireSuperAdmin = false }) {
   const { currentUser, loading } = useAuth();
 
-  // Still loading auth state — render nothing yet
   if (loading) return null;
 
-  // Not logged in — send to login
   if (!currentUser) return <Navigate to="/login" />;
 
-  // Logged in but USER trying to access ADMIN-only route
+  // Only SUPERADMIN can access requireSuperAdmin routes
+  if (requireSuperAdmin && currentUser.user_type !== 'SUPERADMIN') {
+    return <Navigate to="/employees" />;
+  }
+
+  // Only ADMIN or SUPERADMIN can access requireAdmin routes
   if (requireAdmin && currentUser.user_type === 'USER') {
     return <Navigate to="/employees" />;
   }
