@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useRights } from "../context/UserRightsContext";
 import { supabase } from "../lib/supabaseClient";
+import GlobalSearch from "./GlobalSearch";
 
 export default function AppShell() {
   const { currentUser } = useAuth();
@@ -83,7 +84,10 @@ export default function AppShell() {
         </div>
       </aside>
 
-      <main className="app-main" style={{ flex: 1, padding: "32px", overflowY: "auto" }}>
+      <main className="app-main" style={{ flex: 1, padding: "32px", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <div style={{ marginBottom: 24 }}>
+          <GlobalSearch />
+        </div>
         <Outlet />
       </main>
     </div>
